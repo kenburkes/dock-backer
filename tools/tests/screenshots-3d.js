@@ -1,0 +1,22 @@
+const {chromium}=require('playwright');const http=require('http'),fs=require('fs'),path=require('path');
+// Needs three@0.128.0 from npm (cd tools/tests && npm install three@0.128.0); the CDN is not reachable in every workspace.
+const THREE_JS=require('path').join(__dirname,'node_modules/three/build/three.min.js'), GLTF_JS=require('path').join(__dirname,'node_modules/three/examples/js/loaders/GLTFLoader.js');
+const types={'.html':'text/html; charset=utf-8','.js':'application/javascript','.jpg':'image/jpeg','.mp3':'audio/mpeg','.gltf':'model/gltf+json','.bin':'application/octet-stream'};
+const srv=http.createServer((q,r)=>{let u=decodeURIComponent(q.url.split('?')[0]); let f=path.join(process.cwd(),u);
+ if(u.endsWith('three.min.js')) f=''+THREE_JS+''; if(u.endsWith('GLTFLoader.js')) f=''+GLTF_JS+'';
+ fs.readFile(f,(e,d)=>{if(e){r.writeHead(404);r.end();return;} r.writeHead(200,{'Content-Type':types[path.extname(f)]||'application/octet-stream'}); r.end(d);});}).listen(8766);
+(async()=>{const b=await chromium.launch({args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const p=await b.newPage({viewport:{width:390,height:780}});
+await p.route('https://cdnjs.cloudflare.com/**',r=>r.fulfill({path:''+THREE_JS+'',contentType:'application/javascript'}));
+await p.route('https://cdn.jsdelivr.net/**',r=>r.fulfill({path:''+GLTF_JS+'',contentType:'application/javascript'}));
+await p.route('**/fonts.googleapis.com/**',r=>r.abort());
+const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error'&&!/fonts|ERR_FAILED/.test(m.text()))errs.push(m.text())});
+await p.goto('http://localhost:8766/index.html');await p.waitForTimeout(800);
+const ids=['straight','offset','alley','truckstop','atlanta','la','bk-curb','miami','dallas','chicago','bk-bay'];
+const day={time:'day',wx:'clear'};
+await p.evaluate(([ids,day])=>localStorage.setItem('dock-backer-v3',JSON.stringify({stars:Object.fromEntries(ids.map(i=>[i,3])),cond:{alley:day,'bk-curb':day,atlanta:day,chicago:day,'bk-bay':day},guide:true,sound:false,chatter:false,view:'overhead'})),[ids,day]);
+await p.reload();await p.waitForTimeout(800);
+const shot=async(i,name,view)=>{await p.click('#menuBtn').catch(()=>{});await p.waitForTimeout(200);await p.click(`[data-act=pick][data-i="${i}"]`);await p.click('[data-act=start]');
+ while((await p.textContent('#viewBtn'))!==view){await p.keyboard.press('KeyV');await p.waitForTimeout(150);} await p.waitForTimeout(4000); await p.screenshot({path:name});};
+await shot(10,"p1.png","Spotter"); await shot(10,"p2.png","Cab");
+console.log(errs.slice(0,6).join('\n')||'no errors');await b.close();srv.close();})();

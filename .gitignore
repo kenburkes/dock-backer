@@ -1,0 +1,5 @@
+node_modules/
+tools/voice/voices/
+tools/voice/tmp.wav
+*.png
+.DS_Store
