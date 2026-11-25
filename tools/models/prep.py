@@ -21,7 +21,8 @@ def prep(src, out, name, sizes):
     json.dump(g, open(f'{out}/{name}.gltf','w'))
     tot=sum(os.path.getsize(os.path.join(dp,f)) for dp,_,fs in os.walk(out) for f in fs)
     print(name, round(tot/1e6,2),'MB', [ (im['uri']) for im in g.get('images',[])])
-R='/home/user/dock-backer/models'
+# Run from tools/models with each Sketchfab download unpacked in dl/<model id>/
+R='../../models'
 prep('dl/3e8c5275aeab487fa37d227ce0bd1a9a', R+'/cabover', 'cabover', lambda b: 2048 if 'main_body_baked_baseColor' in b else 1024)
 prep('dl/904c9af9277d410c98c395fd9f8f9250', R+'/reefer', 'reefer', lambda b: 1024)
 prep('dl/20f9af9b8a404d5cb022ac6fe87f21f5', R+'/cars', 'cars', lambda b: 512)
