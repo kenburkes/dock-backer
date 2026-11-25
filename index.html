@@ -42,6 +42,10 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .cb-tag{font:600 10px var(--body);letter-spacing:.14em;text-transform:uppercase;color:#1a1600;background:var(--paint)!important;padding:3px 8px;border-radius:5px 5px 0 0}
 .cb-text{font:600 15px var(--body);color:var(--text);padding:8px 12px;border:1px solid var(--paint);border-radius:0 10px 10px 10px;max-width:420px}
 #flash{position:absolute;inset:0;background:#ff5a4e;opacity:0;pointer-events:none}
+#cabhud{position:absolute;inset:0;pointer-events:none}
+#cabhud svg{position:absolute;left:0;width:100%}
+#cabhud .frame{top:0;height:100%}
+#cabhud .cluster{bottom:0;height:34%;overflow:hidden}
 #gl{filter:saturate(1.06) contrast(1.04)}
 .yard.three::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 55%,rgba(0,0,0,.38) 100%)}
 .hint{flex-basis:100%;font:600 13px var(--body);color:var(--paint);text-shadow:0 1px 3px #000}
@@ -123,6 +127,34 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     <canvas id="cv" aria-label="Truck yard seen from above"></canvas>
     <canvas id="gl" aria-label="Truck yard in 3D" hidden></canvas>
     <div id="flash"></div>
+    <div id="cabhud" hidden aria-hidden="true">
+      <svg class="frame" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path d="M0 0H100V8Q50 12 0 8Z" fill="#121518"/>
+        <path d="M18 8.6Q50 11.8 82 8.6L80 13Q50 15.5 20 13Z" fill="#1d2227"/>
+        <path d="M0 0L8 0L4.5 60L0 64Z" fill="#191d21"/>
+        <path d="M100 0L92 0L95.5 60L100 64Z" fill="#191d21"/>
+        <path d="M0 76Q50 67 100 76V100H0Z" fill="#1f2327"/>
+        <path d="M0 76Q50 67 100 76" stroke="#3a4147" stroke-width=".5" fill="none" vector-effect="non-scaling-stroke"/>
+        <path d="M0 84Q50 78 100 84V100H0Z" fill="#191c20"/>
+      </svg>
+      <svg class="cluster" viewBox="0 0 400 230" preserveAspectRatio="xMidYMax meet">
+        <rect x="60" y="34" width="280" height="118" rx="26" fill="#0d0f11" stroke="#2c3237" stroke-width="2"/>
+        <g id="gTach" transform="translate(128 96)"></g>
+        <g id="gSpeed" transform="translate(272 96)"></g>
+        <g id="gAir" transform="translate(200 70)"></g>
+        <g id="gFuel" transform="translate(200 122)"></g>
+        <rect x="178" y="152" width="44" height="26" rx="5" fill="#0d0f11" stroke="#2c3237"/>
+        <text id="gGear" x="200" y="171" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="17" fill="#3ddc84">N</text>
+        <g id="gWheel">
+          <circle cx="200" cy="350" r="196" fill="none" stroke="#151719" stroke-width="30"/>
+          <circle cx="200" cy="350" r="196" fill="none" stroke="#2b2f33" stroke-width="2" stroke-dasharray="3 9"/>
+          <path d="M200 350L64 236M200 350L336 236" stroke="#1a1d20" stroke-width="26" stroke-linecap="round"/>
+          <circle cx="200" cy="350" r="62" fill="#1a1d20"/>
+          <circle cx="200" cy="350" r="46" fill="#24282c" stroke="#3a4046"/>
+          <rect x="196" y="150" width="8" height="12" rx="2" fill="#f2c230"/>
+        </g>
+      </svg>
+    </div>
     <div class="hud gutter" id="hud"></div>
     <div class="cb" id="cb" hidden aria-live="polite"><span class="cb-tag">Yard radio · Channel 19</span><span class="cb-text"></span></div>
     <div class="overlay gutter" id="overlay" hidden><div class="card" id="card" role="dialog" aria-live="polite"></div></div>
@@ -1142,7 +1174,7 @@ function showMenu(){
     <p class="lede">Back a reefer trailer into tight spots across the country: grocery warehouses, a Brooklyn curb, an LA produce market, a Miami port and a Chicago alley.</p>
     <div class="levels">${rows}</div>
     <p class="keys">3 stars: par pull-ups or fewer, nothing touched. Keyboard: ↑ forward, ↓ reverse, ← → steer, C centers the wheel, R restarts, V changes the camera.</p>
-    <p class="keys">3D skies, textures and street props: Poly Haven (CC0).</p>
+    <p class="keys">3D skies, textures and street props: Poly Haven (CC0). Truck: "Semi Truck Baked" by 3DE_Study. Trailer: "53\u2019 Reefer Trailer" by mcskinssketchfab. Cars: "Generic passenger car pack" by Comrade1280. Models from Sketchfab, CC BY 4.0.</p>
     <div class="row"><button class="btn" data-act="chatter">Yard radio: ${save.chatter?'On':'Off'}</button></div>
     ${game.mode==='paused'?'<div class="row"><button class="btn primary" data-act="resume">Keep playing</button><button class="btn" data-act="retry">Restart level</button></div>':''}`);
 }
@@ -1314,6 +1346,7 @@ function sfx(k){
   else if(k==='cone') tone(420,.12,'triangle',.12,0,200);
   else if(k==='curb'){tone(60,.25,'sine',.35); tone(110,.12,'square',.06);}
   else if(k==='air') hiss(.7,.12,1800);
+  if(k==='air'&&typeof airPsi!=='undefined') airPsi=Math.max(92,airPsi-6);
 }
 // ---------- the yard radio: recorded lines, a different voice and way of talking in each region ----------
 const RADIO={"yard": {"pullup": [["This must be amateur night.", "yard-pullup-0.mp3"], ["Ain't no pie-eating contest!", "yard-pullup-1.mp3"], ["Get out and look, driver! G.O.A.L.!", "yard-pullup-2.mp3"], ["Take your time. I've only been waiting since Tuesday.", "yard-pullup-3.mp3"], ["My grandma backs better than that, and she drives a Buick.", "yard-pullup-4.mp3"]], "miss": [["That door's over here, buddy.", "yard-miss-0.mp3"], ["You're crooked as a dog's hind leg.", "yard-miss-1.mp3"], ["Close only counts in horseshoes, driver.", "yard-miss-2.mp3"]], "curb": [["Watch the curb! They just poured that.", "yard-curb-0.mp3"], ["Curb check! Somebody's buying new tires.", "yard-curb-1.mp3"]], "cone": [["That cone had a family, driver.", "yard-cone-0.mp3"], ["You just ran over a cone. Somebody saw that.", "yard-cone-1.mp3"]], "bump": [["Easy! You rang the dinner bell with that one.", "yard-bump-0.mp3"], ["Whoa! The forklift guy just spilled his coffee.", "yard-bump-1.mp3"]], "hitch": [["Keep cranking like that and you'll jackknife it.", "yard-hitch-0.mp3"], ["Straighten up before you tie it in a knot.", "yard-hitch-1.mp3"]], "slow": [["The ice cream in that reefer is melting, driver.", "yard-slow-0.mp3"], ["Any day now. Night shift ends at six.", "yard-slow-1.mp3"]], "crash": [["There goes your safety bonus.", "yard-crash-0.mp3"], ["Somebody get the accident report.", "yard-crash-1.mp3"]], "jack": [["You folded it like a lawn chair.", "yard-jack-0.mp3"]], "late": [["Too late, driver. They gave your door away.", "yard-late-0.mp3"]], "win": [["Now that's how you do it. Ten four.", "yard-win-0.mp3"], ["Smooth. Somebody's been doing this a while.", "yard-win-1.mp3"]], "sloppy": [["Well, it's in there. Ain't pretty, but it's in there.", "yard-sloppy-0.mp3"]]}, "nyc": {"pullup": [["Ay, ay, ay! What are you doin' out there?", "nyc-pullup-0.mp3"], ["You backin' in, or takin' the scenic route?", "nyc-pullup-1.mp3"], ["My cousin Vinny parks better than that, and he don't even drive!", "nyc-pullup-2.mp3"], ["Fuhgeddaboudit. Pull up and try again.", "nyc-pullup-3.mp3"], ["I seen better parkin' on the Belt Parkway at rush hour.", "nyc-pullup-4.mp3"]], "miss": [["Ay! The door's over here, genius!", "nyc-miss-0.mp3"], ["You're crooked like a slice of pizza, pal.", "nyc-miss-1.mp3"], ["What, you need a map? It's right there!", "nyc-miss-2.mp3"]], "curb": [["Ay! Get off the sidewalk! This ain't Times Square!", "nyc-curb-0.mp3"], ["You just hopped the curb. Real nice, pal.", "nyc-curb-1.mp3"]], "bump": [["Whoa! You tryin' to knock the building down, or what?", "nyc-bump-0.mp3"], ["Easy! The landlord's gonna hear that in Queens.", "nyc-bump-1.mp3"]], "hitch": [["Easy, easy! You're gonna bend that thing like a pretzel.", "nyc-hitch-0.mp3"], ["Straighten out. You're makin' me nervous here.", "nyc-hitch-1.mp3"]], "slow": [["Let's go, let's go! I got places to be!", "nyc-slow-0.mp3"], ["Ay, the meter's runnin', pal!", "nyc-slow-1.mp3"], ["My bagel's gettin' cold over here.", "nyc-slow-2.mp3"]], "crash": [["Oh, you gotta be kiddin' me!", "nyc-crash-0.mp3"], ["That's comin' outta your paycheck, pal.", "nyc-crash-1.mp3"]], "jack": [["Unbelievable! You jackknifed it on a one-way street!", "nyc-jack-0.mp3"]], "late": [["Too late, pal. The door's gone. Go get a slice.", "nyc-late-0.mp3"]], "win": [["Now that's what I'm talkin' about!", "nyc-win-0.mp3"], ["Look at you! Not bad for an out-of-towner.", "nyc-win-1.mp3"]], "sloppy": [["Eh. It's in there. I seen worse.", "nyc-sloppy-0.mp3"]]}, "south": {"pullup": [["Well, bless your heart. Try it again, sugar.", "south-pullup-0.mp3"], ["Lord have mercy, I could've walked it in faster.", "south-pullup-1.mp3"], ["Son, you're backin' up like a mule in a mud hole.", "south-pullup-2.mp3"], ["Y'all go on and try that again.", "south-pullup-3.mp3"]], "miss": [["Honey, that door's over yonder.", "south-miss-0.mp3"], ["You're crooked as a barbed-wire fence.", "south-miss-1.mp3"], ["Close, but no cigar, darlin'.", "south-miss-2.mp3"]], "curb": [["Whoa there! That curb ain't a speed bump, darlin'.", "south-curb-0.mp3"], ["You just climbed that curb like a possum up a tree.", "south-curb-1.mp3"]], "bump": [["Easy now! You fixin' to knock the whole building down?", "south-bump-0.mp3"], ["Mercy! You shook the pecans off the trees with that one.", "south-bump-1.mp3"]], "hitch": [["Slow down, son. You're foldin' it up like a pocketknife.", "south-hitch-0.mp3"], ["Ease off that wheel, sugar, before you tie it in a bow.", "south-hitch-1.mp3"]], "slow": [["Daylight's burnin', driver.", "south-slow-0.mp3"], ["We ain't got all day, sugar. Supper's at six.", "south-slow-1.mp3"]], "crash": [["Well, butter my biscuit. That's gonna leave a mark.", "south-crash-0.mp3"], ["Mercy! Somebody call the safety man.", "south-crash-1.mp3"]], "jack": [["You done jackknifed it! Bless your heart.", "south-jack-0.mp3"]], "late": [["Sorry, darlin'. They done gave your spot away.", "south-late-0.mp3"]], "win": [["Well, look at you! Smooth as sweet tea.", "south-win-0.mp3"], ["Now that's some fine drivin'. Your mama'd be proud.", "south-win-1.mp3"]], "sloppy": [["It ain't pretty, but it's in there.", "south-sloppy-0.mp3"], ["Well, you got there. Took the long way, but you got there.", "south-sloppy-1.mp3"]]}, "texas": {"pullup": [["Whoa, partner! Back that thing up like you mean it.", "texas-pullup-0.mp3"], ["Cowboy, I've seen cattle line up straighter than that.", "texas-pullup-1.mp3"], ["That's more pull-ups than boot camp, partner.", "texas-pullup-2.mp3"], ["Hold your horses and try 'er again.", "texas-pullup-3.mp3"]], "miss": [["That door's big as Texas, and you still missed it.", "texas-miss-0.mp3"], ["You're off by a country mile, partner.", "texas-miss-1.mp3"]], "curb": [["You just jumped that curb like a rodeo bull.", "texas-curb-0.mp3"], ["Whoa, cowboy! That curb ain't a cattle guard.", "texas-curb-1.mp3"]], "bump": [["Easy, cowboy! That's a dock, not a barn door.", "texas-bump-0.mp3"]], "hitch": [["Rein it in, partner. You're about to jackknife.", "texas-hitch-0.mp3"], ["Whoa, Nelly! Straighten that rig out.", "texas-hitch-1.mp3"]], "slow": [["Clock's tickin', cowboy. Get a move on.", "texas-slow-0.mp3"], ["Y'all are slower than molasses in January.", "texas-slow-1.mp3"]], "crash": [["Well, that tore it. Somebody call the boss man.", "texas-crash-0.mp3"], ["Hoo boy. That's gonna cost more than a new pair of boots.", "texas-crash-1.mp3"]], "jack": [["Jackknifed! You folded it like a tortilla.", "texas-jack-0.mp3"]], "late": [["Too late, partner. The store done closed the door.", "texas-late-0.mp3"]], "win": [["Yee-haw! Now that's how we do it in Texas.", "texas-win-0.mp3"], ["Smooth as a Sunday drive, partner.", "texas-win-1.mp3"]], "sloppy": [["Well, you got 'er done. Barely.", "texas-sloppy-0.mp3"]]}, "la": {"pullup": [["Dude. Take it from the top.", "la-pullup-0.mp3"], ["Bro, you're doing like, a twelve-point turn over here.", "la-pullup-1.mp3"], ["Totally not it, dude. Again.", "la-pullup-2.mp3"], ["Chill, bro. Breathe. Try it again.", "la-pullup-3.mp3"]], "miss": [["Dude, the door's like, right there.", "la-miss-0.mp3"], ["You're totally crooked, bro.", "la-miss-1.mp3"], ["Not even close, dude. Like, not even.", "la-miss-2.mp3"]], "curb": [["Whoa. Gnarly curb hit, bro.", "la-curb-0.mp3"]], "bump": [["Dude! Chill! You're gonna knock the market over.", "la-bump-0.mp3"], ["Bro, the whole produce section felt that.", "la-bump-1.mp3"]], "hitch": [["Bro, you're about to fold that thing in half.", "la-hitch-0.mp3"], ["Whoa, whoa. Straighten out, dude.", "la-hitch-1.mp3"]], "slow": [["Dude, the avocados are getting old over here.", "la-slow-0.mp3"], ["Traffic on the four oh five moves faster than you, bro.", "la-slow-1.mp3"]], "crash": [["Oh, dude. That is totally not chill.", "la-crash-0.mp3"], ["Bro. That's gonna be on the news.", "la-crash-1.mp3"]], "jack": [["Bro. You totally jackknifed it.", "la-jack-0.mp3"]], "late": [["Sorry, dude. They gave your dock away. Bummer.", "la-late-0.mp3"]], "win": [["Duuude! Totally nailed it.", "la-win-0.mp3"], ["That was so smooth, bro. Respect.", "la-win-1.mp3"]], "sloppy": [["It's in there, dude. Kinda.", "la-sloppy-0.mp3"]]}, "miami": {"pullup": [["Oye! What is this, bro?", "miami-pullup-0.mp3"], ["Ay, mi madre! Try it again, bro.", "miami-pullup-1.mp3"], ["Bro, you're dancing more than South Beach on a Saturday.", "miami-pullup-2.mp3"], ["Dale, dale! One more time!", "miami-pullup-3.mp3"]], "miss": [["Oye, the door is over here, bro!", "miami-miss-0.mp3"], ["You're more crooked than a palm tree in a hurricane.", "miami-miss-1.mp3"]], "curb": [["Ay! Watch the curb, bro!", "miami-curb-0.mp3"]], "bump": [["Easy, bro! You trying to knock the warehouse into the bay?", "miami-bump-0.mp3"]], "hitch": [["Cuidado, bro! You're gonna fold it in half.", "miami-hitch-0.mp3"], ["Ay, ay! Straighten it out!", "miami-hitch-1.mp3"]], "slow": [["Dale, dale! The ship's not gonna wait, bro.", "miami-slow-0.mp3"], ["It's hot out here, bro. My cafecito's getting cold.", "miami-slow-1.mp3"]], "crash": [["Ay, no! That's gonna cost you, bro.", "miami-crash-0.mp3"], ["Ay, Dios mío. Somebody call the boss.", "miami-crash-1.mp3"]], "jack": [["Ay, mi madre! You jackknifed it!", "miami-jack-0.mp3"]], "late": [["Too late, bro. The boat already left.", "miami-late-0.mp3"]], "win": [["Eso! That's how you do it, bro!", "miami-win-0.mp3"], ["Dale! Perfect, bro.", "miami-win-1.mp3"]], "sloppy": [["Bueno. It's in there. More or less.", "miami-sloppy-0.mp3"]]}, "chicago": {"pullup": [["Oh, jeez. What are ya doin' there?", "chicago-pullup-0.mp3"], ["Yous guys gotta pull up and try it again.", "chicago-pullup-1.mp3"], ["I seen better backin' on Lower Wacker, bud.", "chicago-pullup-2.mp3"], ["Come on, bud. Pull ahead and try 'er again.", "chicago-pullup-3.mp3"]], "miss": [["Hey, the door's over here, bud.", "chicago-miss-0.mp3"], ["You're more crooked than the Kennedy at rush hour.", "chicago-miss-1.mp3"]], "curb": [["Oh, jeez. You hopped the curb there.", "chicago-curb-0.mp3"], ["You're up on the sidewalk, bud. Get down from there.", "chicago-curb-1.mp3"]], "bump": [["Whoa! Easy on the building, bud!", "chicago-bump-0.mp3"]], "hitch": [["Careful there. You're gonna fold it like a deep dish.", "chicago-hitch-0.mp3"], ["Straighten out, bud, before ya jackknife it.", "chicago-hitch-1.mp3"]], "slow": [["Come on, bud. The L's faster than you.", "chicago-slow-0.mp3"], ["Let's go, bud. It's freezin' out here.", "chicago-slow-1.mp3"]], "crash": [["Oh, jeez Louise. That ain't good.", "chicago-crash-0.mp3"], ["Aw, nuts. Somebody call dispatch.", "chicago-crash-1.mp3"]], "jack": [["Jackknifed! Oh, for cryin' out loud.", "chicago-jack-0.mp3"]], "late": [["Too late, bud. Store's closed. Try again tomorrow.", "chicago-late-0.mp3"]], "win": [["Now dat's how ya do it, bud!", "chicago-win-0.mp3"], ["Beautiful. Real smooth there.", "chicago-win-1.mp3"]], "sloppy": [["Eh. It's in there. Good enough for the alley.", "chicago-sloppy-0.mp3"]]}};
@@ -1481,7 +1514,7 @@ function roofTex(color){
   return ctex(128,128,(g,w,h)=>{g.fillStyle=color; g.fillRect(0,0,w,h); const R=rnd(7); for(let i=0;i<1400;i++){g.fillStyle=R()<.5?'rgba(255,255,255,.06)':'rgba(0,0,0,.12)'; g.fillRect(R()*w,R()*h,1+R()*2,1+R()*2);}},true);
 }
 function bldgHeight(s,R){
-  if(s.kind==='tooth'||s.style==='warehouse') return L.id==='dallas'?9:8.5;
+  if(s.kind==='tooth'||s.style==='warehouse') return L.id==='dallas'?10:9.5;
   if(s.style==='brownstone') return 12; if(s.style==='store') return 7;
   if(L.id==='chicago'&&s.box&&s.box[1]===0) return 6.5;
   return 10+R()*9;
@@ -1544,7 +1577,7 @@ function materials(){
     concrete:std('#a7a8a3',{roughness:.95})
   };
 }
-function makeTractor(st,color,ours){
+function makeTractorBox(st,color,ours){
   const M=R3.M, Gm=cabGeom(st), g=new THREE.Group(), paint=st.rust?std(color,{roughness:.75,metalness:.1}):new THREE.MeshPhysicalMaterial({color,metalness:.45,roughness:.32,clearcoat:1,clearcoatRoughness:.06});
   const metal=st.chrome?M.chrome:M.dull;
   g.userData.steer=[];
@@ -1610,7 +1643,7 @@ function trailerRearTex(){
     g.fillStyle='#d8262f'; g.fillRect(8,h-18,w-16,8);
   });
 }
-function makeTrailer(color,ours){
+function makeTrailerBox(color,ours){
   const M=R3.M, g=new THREE.Group(), x0=-TR, x1=L2+TF;
   const side=std('#ffffff',{map:trailerSideTex(color,ours),roughness:.45,metalness:.25});
   const roof=std('#d3d8dc',{roughness:.42,metalness:.55}), rear=std('#ffffff',{map:trailerRearTex(),roughness:.5,metalness:.2}), front=std(color,{roughness:.5});
@@ -1627,7 +1660,7 @@ function makeTrailer(color,ours){
   if(ours) g.userData.tails=[-1,1].map(s=>glow(g,x0-.12,1.11,s*1.05,.9,'#ff2a1a',.0));
   return g;
 }
-function car3D(par,s){
+function car3DBox(par,s){
   const M=R3.M, g=new THREE.Group(), paint=new THREE.MeshPhysicalMaterial({color:s.color,metalness:.5,roughness:.3,clearcoat:1,clearcoatRoughness:.08});
   addBox(g,-2.3,2.3,.32,.95,-.92,.92,paint);
   addBox(g,-1.35,.55,.95,1.45,-.8,.8,M.glass);
@@ -1694,12 +1727,187 @@ function nearSolid(x,y){
   const q=rect(x,y,0,.3,.3,.3);
   return S.soft.some(s=>overlap(s.poly,q))||S.solids.some(s=>overlap(s.poly,q));
 }
+// ---------- real vehicle models (Sketchfab, CC BY 4.0; credits in README and the Levels menu) ----------
+const VEH={};
+function loadGLTF(path){
+  return new Promise(ok=>{
+    if(!THREE.GLTFLoader) return ok(null);
+    new THREE.GLTFLoader().load(path,g=>{
+      g.scene.traverse(o=>{ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; o.geometry.userData.keep=true; (Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{m.userData.keep=true;}); } });
+      ok(g.scene);
+    },undefined,()=>ok(null));
+  });
+}
+function loadVehicles(){
+  if(VEH.p) return VEH.p;
+  VEH.p=Promise.all([loadGLTF('models/cabover/cabover.gltf'),loadGLTF('models/reefer/reefer.gltf'),loadGLTF('models/cars/cars.gltf')]).then(([c,r,k])=>{
+    VEH.cab=c; VEH.reefer=r; VEH.cars=k?carProtos(k):null; VEH.ready=true;
+    if(R3&&R3.scene&&viewMode!=='map') build3D();
+  });
+  return VEH.p;
+}
+// paint colors for the truck, done as a color matrix so it works on every phone browser
+function cmMul(a,b){const r=[]; for(let i=0;i<3;i++) for(let j=0;j<3;j++){let s=0; for(let k=0;k<3;k++) s+=a[i*3+k]*b[k*3+j]; r.push(s);} return r;}
+function cmHue(deg){const a=deg*Math.PI/180, c=Math.cos(a), s=Math.sin(a);
+  return [.213+c*.787-s*.213,.715-c*.715-s*.715,.072-c*.072+s*.928, .213-c*.213+s*.143,.715+c*.285+s*.140,.072-c*.072-s*.283, .213-c*.213-s*.787,.715-c*.715+s*.715,.072+c*.928+s*.072];}
+function cmSat(v){return [.213+.787*v,.715-.715*v,.072-.072*v, .213-.213*v,.715+.285*v,.072-.072*v, .213-.213*v,.715-.715*v,.072+.928*v];}
+function cmScale(v){return [v,0,0,0,v,0,0,0,v];}
+const SEPIA=[.393,.769,.189,.349,.686,.168,.272,.534,.131];
+const PAINTS=[cmMul(cmScale(1.15),cmMul(SEPIA,cmSat(.7))), cmMul(cmScale(1.45),cmSat(1.5)), cmMul(cmScale(1.35),cmMul(cmSat(1.9),cmHue(150))), cmMul(cmScale(.7),cmSat(0)), cmMul(cmScale(1.5),cmMul(cmSat(2.1),cmHue(300)))];
+const PAINT_CACHE={};
+function paintedMap(map,key,mat){
+  if(PAINT_CACHE[key]) return PAINT_CACHE[key];
+  const img=map.image, c=document.createElement('canvas'); c.width=img.width; c.height=img.height;
+  const g=c.getContext('2d'); g.drawImage(img,0,0); const d=g.getImageData(0,0,c.width,c.height), p=d.data, m=mat;
+  for(let i=0;i<p.length;i+=4){const r=p[i],gg=p[i+1],b=p[i+2]; p[i]=m[0]*r+m[1]*gg+m[2]*b; p[i+1]=m[3]*r+m[4]*gg+m[5]*b; p[i+2]=m[6]*r+m[7]*gg+m[8]*b;}
+  g.putImageData(d,0,0);
+  const t=new THREE.CanvasTexture(c); t.flipY=map.flipY; t.encoding=THREE.sRGBEncoding; t.anisotropy=8; FX.keep=FX.keep||new Set(); FX.keep.add(t);
+  return PAINT_CACHE[key]=t;
+}
+const CAB_S=.6, CAB_OFF=3.475*.6;
+function cabTractor(paintIdx,ours){
+  const g=new THREE.Group(), m=VEH.cab.clone(true);
+  m.rotation.y=Math.PI/2; m.scale.setScalar(CAB_S); m.position.set(CAB_OFF,0,0); g.add(m);
+  g.userData.steer=[];
+  const wheels=[]; m.traverse(o=>{ if(o.isMesh){
+    if(/tire|wheel/i.test(o.name)) wheels.push(o);
+    if(/main_body/.test(o.name)&&o.material.map){ const mt=o.material.clone(); mt.userData.keep=true; mt.map=paintedMap(o.material.map,'cab'+paintIdx,PAINTS[paintIdx]); o.material=mt; }
+  }});
+  for(const w of wheels){
+    if(!w.geometry.boundingBox) w.geometry.computeBoundingBox();
+    const c=w.geometry.boundingBox.getCenter(new THREE.Vector3()).applyMatrix4(w.matrix);
+    const pv=new THREE.Group(); pv.rotation.order='YXZ'; pv.position.copy(c); w.parent.add(pv); w.position.sub(c); pv.add(w);
+    if(/front/i.test(w.name)) g.userData.steer.push(pv);
+    if(ours) (R3.spin||(R3.spin=[])).push({o:pv,r:.87,ax:'x'});
+  }
+  contactShadow(g,-1.7,4.9,-1.3,1.3,.85);
+  const head=[]; for(const s of [-1,1]){const sp=new THREE.SpotLight('#fff2d6',0,40,.5,.6,1.2); sp.position.set(4.8,1.0,s*.85); sp.target.position.set(18,0,s*1.5); g.add(sp,sp.target); head.push(sp);}
+  g.userData.head=head; g.userData.front=4.75; g.userData.headY=.95;
+  return g;
+}
+const REEF_S=1.092;
+function reeferTrailer(color,ours){
+  const g=new THREE.Group(), m=VEH.reefer.clone(true);
+  m.rotation.y=Math.PI/2; m.scale.setScalar(REEF_S); m.position.set(10.45*REEF_S-TR,0,0); g.add(m);
+  if(!ours&&color){ m.traverse(o=>{ if(o.isMesh){ const mt=o.material.clone(); mt.color=new THREE.Color(color); o.material=mt; } }); }
+  contactShadow(g,-TR-.2,L2+TF+.3,-1.3,1.3,.7);
+  if(ours) g.userData.tails=[-1,1].map(s=>glow(g,-TR-.1,1.1,s*1.05,.9,'#ff2a1a',0));
+  return g;
+}
+function carProtos(scene){
+  scene.updateMatrixWorld(true);
+  const bodies={}, wheels=[];
+  scene.traverse(o=>{ if(!o.isMesh) return; const b=new THREE.Box3().setFromObject(o);
+    const mm=o.name.match(/^(.*?)_[Bb]ody_/); if(mm){ const k=mm[1]; (bodies[k]=bodies[k]||{meshes:[],box:new THREE.Box3()}); bodies[k].meshes.push(o); bodies[k].box.union(b); }
+    else if(/^Wheel/i.test(o.name)) wheels.push({o,c:b.getCenter(new THREE.Vector3())}); });
+  const protos=[];
+  for(const k in bodies){
+    const B=bodies[k], bx=B.box.clone().expandByScalar(.25);
+    const ws=wheels.filter(w=>bx.containsPoint(w.c)); if(ws.length<4) continue;
+    const c=ws.slice(0,4).map(w=>w.c);
+    // the two closest wheels are one axle; the wheelbase runs between the axles
+    let best=null; for(const [a,b,x,y] of [[0,1,2,3],[0,2,1,3],[0,3,1,2]]){ const d=c[a].distanceTo(c[b])+c[x].distanceTo(c[y]); if(!best||d<best.d) best={d,p:[[a,b],[x,y]]}; }
+    const m1=c[best.p[0][0]].clone().add(c[best.p[0][1]]).multiplyScalar(.5), m2=c[best.p[1][0]].clone().add(c[best.p[1][1]]).multiplyScalar(.5);
+    const dir=m2.clone().sub(m1), ang=Math.atan2(-dir.z,dir.x), ctr=B.box.getCenter(new THREE.Vector3());
+    const inner=new THREE.Group();
+    for(const o of B.meshes.concat(ws.slice(0,4).map(w=>w.o))){ const n=new THREE.Mesh(o.geometry,o.material); n.applyMatrix4(o.matrixWorld); n.castShadow=true; inner.add(n); }
+    inner.position.set(-ctr.x,-B.box.min.y,-ctr.z);
+    const turn=new THREE.Group(); turn.rotation.y=-ang; turn.add(inner);
+    const wrap=new THREE.Group(); wrap.add(turn); wrap.updateMatrixWorld(true);
+    const L=new THREE.Box3().setFromObject(wrap).getSize(new THREE.Vector3()).x;
+    wrap.scale.setScalar(4.5/L); protos.push(wrap);
+  }
+  return protos.length?protos:null;
+}
+function makeTractor(st,color,ours){
+  if(VEH.cab){ const idx=ours?tierOf(li):[1,2,3,0][Math.floor((color||'').length+((color||'').charCodeAt(2)||0))%4]; return cabTractor(idx,ours); }
+  return makeTractorBox(st,color,ours);
+}
+function makeTrailer(color,ours){ return VEH.reefer?reeferTrailer(color,ours):makeTrailerBox(color,ours); }
+function car3D(par,s){
+  if(VEH.cars){ const P=VEH.cars, i=Math.abs(Math.floor(s.x*7+s.y*13))%P.length, o=P[i].clone(true);
+    if(Math.round(s.x+s.y)%2) o.rotation.y=Math.PI;
+    const g=new THREE.Group(); g.add(o); contactShadow(g,-2.3,2.3,-.95,.95,.85); g.position.set(s.x,0,s.y); g.rotation.y=-s.ang; par.add(g); return; }
+  car3DBox(par,s);
+}
+
+// ---------- shipping yards: dock fronts, concrete aprons, light towers, and a real horizon ----------
+const YARD_IDS=['straight','offset','alley','miami','la','dallas','atlanta','truckstop'];
+function numberPlate(txt){
+  return ctex(128,64,(g,w,h)=>{g.fillStyle='#1d3a6b'; g.fillRect(0,0,w,h); g.strokeStyle='#e9eef2'; g.lineWidth=4; g.strokeRect(4,4,w-8,h-8);
+    g.fillStyle='#ffffff'; g.font='bold 40px "Big Shoulders Display",Impact,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(txt,w/2,h/2+2);});
+}
+function stripeTex(){ return ctex(64,64,(g,w,h)=>{g.fillStyle='#f2c230'; g.fillRect(0,0,w,h); g.fillStyle='#151515'; for(let k=-64;k<128;k+=22){g.beginPath(); g.moveTo(k,0); g.lineTo(k+11,0); g.lineTo(k+11-64,h); g.lineTo(k-64,h); g.fill();}},true); }
+function mast3D(sc,x,y,h,lit){
+  const g=new THREE.Group(); g.position.set(x,0,y);
+  const pole=new THREE.Mesh(new THREE.CylinderGeometry(.14,.32,h,10),std('#8a9196',{metalness:.7,roughness:.35})); pole.position.y=h/2; pole.castShadow=true; g.add(pole);
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(.9,.08,6,16),std('#6f777d',{metalness:.7,roughness:.4})); ring.rotation.x=Math.PI/2; ring.position.y=h; g.add(ring);
+  for(let k=0;k<4;k++){const a=k*Math.PI/2+.4, hd=new THREE.Mesh(new THREE.BoxGeometry(.7,.25,.45),new THREE.MeshStandardMaterial({color:'#2b2f33',emissive:'#ffd9a0',emissiveIntensity:lit?1.4:0})); hd.position.set(Math.cos(a)*.9,h-.1,Math.sin(a)*.9); hd.rotation.y=-a; g.add(hd);
+    if(lit) glow(g,Math.cos(a)*.9,h-.25,Math.sin(a)*.9,5,'#ffcf8a',.75);}
+  sc.add(g);
+}
+function warehouse3D(sc,x0,z0,x1,z1,h,tint){
+  const w=x1-x0, d=z1-z0, wm=(len)=>phMat('factory_wall',Math.max(1,len/6),h/6,{color:tint||'#e9ecec',roughness:.85});
+  const rm=phMat('gravel_concrete',w/6,d/6,{color:'#a9aaa6',roughness:1});
+  const me=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),[wm(d),wm(d),rm,R3.M.dark,wm(w),wm(w)]);
+  me.position.set((x0+x1)/2,h/2,(z0+z1)/2); me.castShadow=true; me.receiveShadow=true; sc.add(me);
+  return me;
+}
+function yardExtras3D(sc,R){
+  const id=L.id, T=TH(), lit=T.time!=='day'||T.wet||T.fog, M=R3.M;
+  if(!YARD_IDS.includes(id)) return;
+  // dock fronts: canopy, numbered door plates, dock light arms, safety posts, striped bumpers
+  const flat=S.doors.filter(d=>Math.abs(Math.sin(d.ang))>.99||Math.abs(Math.cos(d.ang))>.99);
+  if(flat.length){
+    const sm=std('#b8bfc4',{metalness:.6,roughness:.35}), post=std('#f2c230',{roughness:.5}), stripes=std('#ffffff',{map:stripeTex()});
+    for(const d of flat){
+      const g=new THREE.Group(); g.position.set(d.x,0,d.y); g.rotation.y=-d.ang; sc.add(g);
+      addBox(g,0,1.7,5.4,5.6,-2.05,2.05,sm);
+      addBox(g,1.55,1.7,5.0,5.4,-2.05,2.05,std('#9aa3a9',{metalness:.5,roughness:.4}));
+      const pl=new THREE.Mesh(new THREE.PlaneGeometry(1.1,.55),new THREE.MeshStandardMaterial({map:numberPlate(String(d.num)),roughness:.6})); pl.position.set(.08,4.75,0); pl.rotation.y=Math.PI/2; g.add(pl);
+      addBox(g,0,.9,4.35,4.42,1.75,1.82,sm); addBox(g,.75,1.0,4.2,4.4,1.68,1.9,new THREE.MeshStandardMaterial({color:'#333',emissive:'#fff1c8',emissiveIntensity:lit?1:0}),false);
+      if(lit) glow(g,.9,4.2,1.79,1.6,'#fff1c8',.6);
+      for(const z of [-2.15,2.15]){ addCyl(g,.14,1.25,'y',.55,.62,z,post,12); }
+      for(const z of [-1.15,1.15]) addBox(g,.22,.26,.75,1.15,z-.2,z+.2,stripes,false);
+    }
+  }
+  // concrete apron in front of the doors
+  const apron=(x0,z0,x1,z1)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,z1-z0),phMat('concrete_wall_001',(x1-x0)/4,(z1-z0)/4,{color:T.wet?'#9da3a6':'#d6d4cf',roughness:T.wet?.35:.9,polygonOffset:true,polygonOffsetFactor:-1}));
+    m.rotation.x=-Math.PI/2; m.position.set((x0+x1)/2,.004,(z0+z1)/2); m.receiveShadow=true; sc.add(m);
+    const jm=new THREE.MeshBasicMaterial({color:'#000',transparent:true,opacity:.18,depthWrite:false});
+    for(let x=x0+4;x<x1;x+=4){const l=new THREE.Mesh(new THREE.PlaneGeometry(.05,z1-z0),jm); l.rotation.x=-Math.PI/2; l.position.set(x,.006,(z0+z1)/2); sc.add(l);}
+    for(let z=z0+4;z<z1;z+=4){const l=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,.05),jm); l.rotation.x=-Math.PI/2; l.position.set((x0+x1)/2,.006,z); sc.add(l);} };
+  if(['straight','offset','alley','miami'].includes(id)) apron(0,35,W,51);
+  if(id==='dallas') apron(12,4,28,34);
+  // yard light towers in the corners
+  const masts={straight:[[2,40],[42,40],[2,6],[42,6]],offset:[[2,40],[42,40],[2,6],[42,6]],alley:[[2,40],[42,40],[2,6],[42,6]],miami:[[2,30],[42,30]],atlanta:[[-3,26],[47,26]],la:[[-3,30],[47,30]],truckstop:[[-3,30],[47,30]],dallas:[[9,52]]}[id]||[];
+  masts.forEach(([x,y])=>mast3D(sc,x,y,16,lit));
+  // beyond the fence: a drop lot of parked trailers, neighbor warehouses, tree lines
+  const outerTrailers=(x0,y,n,ang)=>{for(let i=0;i<n;i++){const t=makeTrailer(TINTS[i%TINTS.length],false); t.position.set(x0+i*4,0,y); t.rotation.y=-ang; sc.add(t);}};
+  if(['straight','offset','alley'].includes(id)){ outerTrailers(4,-3.5,10,Math.PI/2); warehouse3D(sc,-70,-70,-10,-30,13); warehouse3D(sc,55,-60,120,-25,11,'#dfe2e0'); warehouse3D(sc,-80,10,-30,70,12,'#e6e3dc'); }
+  if(id==='atlanta'){ warehouse3D(sc,-60,-60,-8,-25,12); warehouse3D(sc,55,-50,110,-15,11,'#dcdfdd'); }
+  if(id==='la'){ warehouse3D(sc,-70,-50,-10,-12,10,'#e3d3bf'); warehouse3D(sc,55,-40,110,10,9,'#d9c9b2'); }
+  if(id==='dallas'){ warehouse3D(sc,-70,-60,-8,-20,10,'#efe7da'); outerTrailers(30,60,6,Math.PI/2); }
+  if(id==='truckstop'){ warehouse3D(sc,60,-40,100,-10,7,'#d8d2c8'); outerTrailers(-2,-8,11,Math.PI/2); }
+  if(id==='miami'){
+    const cc=['#b5432f','#2f6f9f','#c98a2b','#3f7f5a','#7a7f86','#8c3b5e','#d9d4c7'];
+    for(let row=0;row<5;row++) for(let col=0;col<8;col++){ const hgt=1+Math.floor(R()*3), x=-30+col*13.5, z=-8-row*3.2;
+      for(let k=0;k<hgt;k++) addBox(sc,x-6.1,x+6.1,k*2.6,k*2.6+2.58,z-1.22,z+1.22,phMat('container_side',4,1,{color:cc[Math.floor(R()*cc.length)],roughness:.6,metalness:.3}));}
+    const steel=std('#c23a2c',{metalness:.4,roughness:.5});
+    for(const cx of [0,46]){ const z0=-34, z1=-50; for(const x of [cx-8,cx+8]) for(const z of [z0,z1]) addBox(sc,x-.6,x+.6,0,42,z-.6,z+.6,steel);
+      addBox(sc,cx-9,cx+9,40,43,z1-.8,z0+.8,steel); addBox(sc,cx-1.5,cx+1.5,41,43.5,z0-40,z1+20,steel); addBox(sc,cx-3,cx+3,43.5,47,z0-4,z0+2,std('#e9ecef',{roughness:.5}));}
+    const sea=new THREE.Mesh(new THREE.PlaneGeometry(600,200),std('#2f5c74',{metalness:.3,roughness:.15})); sea.rotation.x=-Math.PI/2; sea.position.set(W/2,-.02,-160); sc.add(sea);
+  }
+  // tree line on the horizon
+  if(id!=='miami') for(let i=0;i<40;i++){ const a=i/40*Math.PI*2, r=110+R()*30; tree3D(sc,W/2+Math.cos(a)*r,H/2+Math.sin(a)*r,4+R()*2,R()<.4); }
+}
+
 function build3D(){
   if(!R3) return;
   if(R3.scene) disposeScene(R3.scene);
   if(R3.env) R3.env.dispose();
   if(R3.extra){R3.extra.forEach(t=>t.dispose()); R3.extra=null;}
-  R3.spin=[]; R3.camReady=false; R3.M=materials();
+  R3.spin=[]; R3.camReady=false; R3.M=materials(); loadVehicles();
   const T=TH(), M=R3.M, sc=new THREE.Scene(), R=rnd(li*31+7);
   R3.scene=sc;
   const night=T.time==='night', dusk=T.time==='dusk', dim=night||dusk||T.wet||T.fog;
@@ -1827,10 +2035,13 @@ function build3D(){
     if(i<4&&(night||dusk||T.wet||T.fog)){const sp=new THREE.SpotLight('#ffd7a0',night?1.7:dusk?.9:.6,32,.95,.7,1.3); sp.position.set(x,9,y); sp.target.position.set(x,0,y); sc.add(sp,sp.target);}
   });
   decor3D(sc,R);
+  yardExtras3D(sc,R);
   // our truck
   const style=truck.style||TRUCKS[0];
+  R3.spin=[];
   R3.tractor=makeTractor(style,style.color,true); R3.trailer=makeTrailer('#e9ecef',true); sc.add(R3.tractor,R3.trailer);
-  R3.heads=[-1,1].map(s=>glow(R3.tractor,5.35,1.31,s*.81,1.6,'#fff2d0',0));
+  const hx=R3.tractor.userData.front||5.35, hy=R3.tractor.userData.headY||1.31;
+  R3.heads=[-1,1].map(s=>glow(R3.tractor,hx+.05,hy,s*.85,1.6,'#fff2d0',0));
   const headOn=night||dusk||T.wet||T.fog;
   R3.tractor.userData.head.forEach(h=>h.intensity=headOn?(night?2.2:1.2):0);
   R3.rev=new THREE.SpotLight('#ffffff',0,14,.7,.6,1.4); R3.rev.position.set(-TR-.1,1.1,0); R3.rev.target.position.set(-TR-8,0,0); R3.trailer.add(R3.rev,R3.rev.target);
@@ -1879,7 +2090,7 @@ function render3D(ts,dt){
   r.tractor.position.set(truck.x,0,truck.y); r.tractor.rotation.y=-truck.th;
   r.trailer.position.set(ax,0,ay); r.trailer.rotation.y=-truck.ph;
   r.tractor.userData.steer.forEach(p=>p.rotation.y=-truck.delta);
-  r.dist+=truck.v*dt; for(const w of r.spin) if(w.o.parent===r.tractor||w.o.parent===r.trailer||(w.o.parent&&w.o.parent.parent===r.tractor)) w.o.rotation.z=-r.dist/w.r;
+  r.dist+=truck.v*dt; for(const w of r.spin){ if(w.ax==='x') w.o.rotation.x=r.dist/w.r; else w.o.rotation.z=-r.dist/w.r; }
   const dark=T.time!=='day'||T.wet||T.fog;
   r.rev.intensity=truck.v<-.02&&dark?1.6:0;
   const braking=truck.v===0||!(keys.r||pedal.r||keys.f||pedal.f);
@@ -1903,11 +2114,11 @@ function render3D(ts,dt){
     const Tg=S.target, px=Tg.type==='dock'?Tg.door.x:Tg.p[0], py=Tg.type==='dock'?Tg.door.y:Tg.p[1], an=Tg.type==='dock'?Tg.door.ang:Tg.ang, nx=Math.cos(an), ny=Math.sin(an);
     const inside=(x,y)=>{const q=rect(x,y,0,.6,.6,.6); return S.solids.some(o=>(o.kind==='bldg'||o.kind==='tooth')&&overlap(o.poly,q));};
     let sx=px+nx*1.5, sy=py+ny*1.5;
-    for(const [out,side] of [[1.5,5],[3,3.5],[5,2],[7,0]]){const x=px+nx*out-ny*side, y=py+ny*out+nx*side; if(!inside(x,y)){sx=x; sy=y; break;}}
-    pos=new THREE.Vector3(sx,6,sy); look=new THREE.Vector3((rx*2+truck.x)/3,1.5,(ry*2+truck.y)/3); fov=55;
+    for(const [out,side] of [[1.2,0],[2.5,1.5],[4,2.5]]){const x=px+nx*out-ny*side, y=py+ny*out+nx*side; if(!inside(x,y)){sx=x; sy=y; break;}}
+    pos=new THREE.Vector3(sx,7.5,sy); look=new THREE.Vector3((rx*2+truck.x)/3,1.5,(ry*2+truck.y)/3); fov=55;
   } else {
-    const Gm=cabGeom(truck.style||TRUCKS[0]), [ex,ey]=toWorld(truck,Gm.w1-.45,-.55), [lx,ly]=toWorld(truck,Gm.w1+12,-.3);
-    pos=new THREE.Vector3(ex,2.62,ey); look=new THREE.Vector3(lx,1.0,ly); fov=68;
+    const Gm=cabGeom(truck.style||TRUCKS[0]), real=!!VEH.cab, ex0=real?3.75:Gm.w1-.45, [ex,ey]=toWorld(truck,ex0,-.55), [lx,ly]=toWorld(truck,ex0+12,-.4);
+    pos=new THREE.Vector3(ex,real?2.55:2.62,ey); look=new THREE.Vector3(lx,real?1.35:1.0,ly); fov=72;
   }
   const k=r.camReady&&viewMode!=='cab'?1-Math.exp(-dt*5):1;
   cam.position.lerp(pos,k); r.look.lerp(look,k); cam.lookAt(r.look); r.camReady=true;
@@ -1919,22 +2130,48 @@ function render3D(ts,dt){
     for(let i=0;i<u.n;i++){a[i*3+1]-=u.speed*dt; if(u.snow) a[i*3]+=Math.sin(ts/900+i)*.3*dt; else a[i*3]+=u.speed*.15*dt; if(a[i*3+1]<0){a[i*3+1]+=30; a[i*3]=Math.random()*70-35;}}
     pr.geometry.attributes.position.needsUpdate=true;}
   const R=r.renderer;
+  const inCab=viewMode==='cab'; if(inCab&&VEH.cab) r.tractor.visible=false;
   R.setRenderTarget(null); R.clear(); R.render(r.scene,cam);
+  r.tractor.visible=true;
   if(viewMode==='cab'){
     const Gm=cabGeom(truck.style||TRUCKS[0]);
     for(const [m,s] of [[r.mL,-1],[r.mR,1]]){
-      const [mx2,my2]=toWorld(truck,Gm.w1-.12,s*1.62), out=s*.16, a=truck.th+Math.PI-out;
-      m.cam.position.set(mx2,2.4,my2); m.cam.lookAt(mx2+Math.cos(a)*20,.6,my2+Math.sin(a)*20);
+      const [mx2,my2]=toWorld(truck,VEH.cab?4.45:Gm.w1-.12,s*1.62), out=s*.12, a=truck.th+Math.PI+out;
+      m.cam.position.set(mx2,VEH.cab?2.3:2.4,my2); m.cam.lookAt(mx2+Math.cos(a)*20,.6,my2+Math.sin(a)*20);
       R.setRenderTarget(m.rt); R.clear(); R.render(r.scene,m.cam);
     }
     R.setRenderTarget(null); R.clearDepth(); R.render(r.hudScene,r.hudCam);
   }
 }
+// the dashboard in the cab view: gauges and a steering wheel that follow the truck
+const SVGNS='http://www.w3.org/2000/svg';
+function gauge(id,r,from,to,max,step,label,red){
+  const g=document.getElementById(id); if(!g) return; let h=`<circle r="${r}" fill="#15191c" stroke="#3a4147" stroke-width="2"/>`;
+  for(let v=0;v<=max;v+=step){const a=(from+(to-from)*v/max-90)*DEG, big=r>25; const r1=r-(big?3:2), r2=r-(big?9:5);
+    h+=`<line x1="${Math.cos(a)*r1}" y1="${Math.sin(a)*r1}" x2="${Math.cos(a)*r2}" y2="${Math.sin(a)*r2}" stroke="${red&&v>=red?'#ff5a4e':'#c9d1d6'}" stroke-width="${big?1.6:1.2}"/>`;
+    if(big&&v%(step*2)===0) h+=`<text x="${Math.cos(a)*(r-17)}" y="${Math.sin(a)*(r-17)+3}" text-anchor="middle" font-size="8" fill="#9aa6ae" font-family="IBM Plex Mono,monospace">${label==='x100'?v/100:v}</text>`;}
+  h+=`<text y="${r*.55}" text-anchor="middle" font-size="${r>25?7:5}" fill="#6f7a82" font-family="IBM Plex Sans,sans-serif">${label==='x100'?'RPM x100':label}</text>`;
+  h+=`<line class="nd" x1="0" y1="0" x2="0" y2="${-(r-6)}" stroke="#ff7a2e" stroke-width="${r>25?2.4:1.6}" stroke-linecap="round"/><circle r="${r>25?4:2.5}" fill="#2a2f33"/>`;
+  g.innerHTML=h; g.dataset.from=from; g.dataset.to=to; g.dataset.max=max;
+}
+function needle(id,v){const g=document.getElementById(id); if(!g||!g.dataset.max) return; const f=+g.dataset.from,t=+g.dataset.to,m=+g.dataset.max; const a=f+(t-f)*Math.max(0,Math.min(1,v/m)); g.querySelector('.nd').setAttribute('transform',`rotate(${a})`);}
+gauge('gTach',40,-130,130,2500,250,'x100',2100); gauge('gSpeed',40,-130,130,60,5,'MPH'); gauge('gAir',17,-110,110,150,25,'AIR PSI'); gauge('gFuel',13,-100,100,4,1,'FUEL');
+const cabhud=$('#cabhud'), gWheel=$('#gWheel'), gGear=$('#gGear'); let airPsi=120;
+function updateCab(dt){
+  if(cabhud.hidden) return;
+  const mph=Math.abs(truck.v)*2.237, rpm=eng?eng.rpm:650+Math.abs(truck.v)*300;
+  if(truck.v===0&&game.moving===false) airPsi=Math.max(95,airPsi-0); airPsi=Math.min(125,airPsi+dt*2);
+  needle('gTach',rpm); needle('gSpeed',mph); needle('gAir',airPsi); needle('gFuel',3);
+  gWheel.setAttribute('transform',`rotate(${truck.delta/MAXD*450} 200 350)`);
+  const gear=truck.v<-.05||((keys.r||pedal.r)&&!(keys.f||pedal.f))?'R':truck.v>.05||keys.f||pedal.f?'D':'N';
+  if(gGear.textContent!==gear){gGear.textContent=gear; gGear.setAttribute('fill',gear==='R'?'#ff8a7f':gear==='D'?'#3ddc84':'#c9d1d6');}
+}
 function setView(v){
   if(v!=='map'&&!init3D()) v='map';
   viewMode=v; save.view=v; persist();
   viewBtn.textContent=VIEW_NAMES[v];
-  gl.hidden=v==='map'; cv.hidden=v!=='map'; yard.classList.toggle('three',v!=='map');
+  gl.hidden=v==='map'; cv.hidden=v!=='map'; yard.classList.toggle('three',v!=='map'); cabhud.hidden=v!=='cab';
+  if(v!=='map') loadVehicles&&R3&&loadVehicles();
   if(v!=='map'){resize3D(); if(S&&!R3.scene) build3D(); if(R3) R3.camReady=false;}
 }
 viewBtn.addEventListener('click',()=>{setView(VIEWS[(VIEWS.indexOf(viewMode)+1)%VIEWS.length]); viewBtn.blur();});
@@ -1946,7 +2183,7 @@ function tick(ts){
   if(game.mode==='play'){physics(dt); if(game.mode==='play') post(dt);}
   if(game.flash>0) game.flash=Math.max(0,game.flash-dt*1.6);
   fx(dt);
-  if(viewMode!=='map'&&R3&&R3.scene) render3D(ts,dt); else draw(ts);
+  if(viewMode!=='map'&&R3&&R3.scene){ render3D(ts,dt); updateCab(dt); } else draw(ts);
   flashEl.style.opacity=(game.flash||0)*.35;
   updateUI(); beeper(); engineTick(dt);
   requestAnimationFrame(tick);
