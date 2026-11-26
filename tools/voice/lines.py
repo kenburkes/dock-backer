@@ -1,6 +1,6 @@
 LINES={
  'yard':{
-  'pullup':["This must be amateur night.","Ain't no pie-eating contest!","Get out and look, driver! G.O.A.L.!","Take your time. I've only been waiting since Tuesday.","My grandma backs better than that, and she drives a Buick."],
+  'pullup':["This must be amateur night.","Ain't no pie-eating contest!","Get out and look, driver! G.O.A.L.!","Take your time. I've only been waiting since Tuesday.","My grandma backs better than that, and she drives a minivan."],
   'miss':["That door's over here, buddy.","You're crooked as a dog's hind leg.","Close only counts in horseshoes, driver."],
   'curb':["Watch the curb! They just poured that.","Curb check! Somebody's buying new tires."],
   'cone':["That cone had a family, driver.","You just ran over a cone. Somebody saw that."],
@@ -136,3 +136,15 @@ LINES.update({
   'sloppy':["It's in. Don't tell the yard boss how."]},
 })
 VOICES.update({'mountain':('sam-medium',.95,.97),'northwest':('bryce-medium',1.0,1.02),'farm':('norman-medium',.92,1.0),'kc':('john-medium',.98,.96)})
+
+LINES['cave']={
+  'pullup':["Easy now. These pillars been here a million years.","Come on, driver. It's a cave, not a racetrack.","Pull up and line it up with the gap."],
+  'miss':["Bay three, driver. Down at the end there.","You're crooked as a mine shaft."],
+  'bump':["Easy! You'll shake rocks loose off the ceiling."],
+  'hitch':["Watch it, that trailer's swinging toward the rock."],
+  'slow':["It's always sixty degrees down here, but my shift still ends.","Let's go, driver. Freezer's waiting on that load."],
+  'crash':["You kissed the rock. The rock won."],
+  'jack':["Jackknifed underground. Now that takes talent."],
+  'late':["Too late, driver. They locked up the cave for the night."],
+  'win':["Right in the slot. Welcome to the caves.","Smooth. You can drive underground with me anytime."],
+  'sloppy':["It's in. Nobody can see that angle in the dark anyway."]}

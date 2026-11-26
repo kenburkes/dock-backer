@@ -30,6 +30,13 @@ https://claude.ai/artifact/6mYuMU7RH767BtWEkmiU54 (publish updates to that same 
   radio region (kc, farm, mountain, northwest). No double trailers: real drivers don't back doubles.
 - Trucks upgrade by level: Old Day Cab, Fleet Sleeper, Owner-Operator Mid-Roof, Big Sleeper,
   Long-Hood Show Truck.
+- Radio voices: ElevenLabs (Kenny's Starter plan, commercial use), one Voice Library accent voice per
+  region (list in README and `tools/voice/gen_el.py`). The key is a network secret on the `dock-backer`
+  environment (header xi-api-key). Kenny can ask to swap any voice.
+- Level 16 is the Kansas City underground warehouse (limestone caves; generic name, no real business name):
+  rock pillars, low ceiling, no sky or weather. The cave guy has his own lines.
+- Levels go easiest to hardest: each level should need at least as many pull-ups (by the test driver)
+  as the one before, and every level must stay possible.
 - Yard radio: a heckler per region (yard, Brooklyn, South, Texas, LA, Miami, Chicago); every
   region has its own lines, no repeats. Kenny's lines: "This must be amateur night" and
   "Ain't no pie-eating contest!" belong to the grocery warehouse guy.
@@ -64,8 +71,6 @@ https://claude.ai/artifact/6mYuMU7RH767BtWEkmiU54 (publish updates to that same 
 
 ## Next
 
-1. ElevenLabs accent voices for all radio lines (Starter plan for commercial use), same lines as
-   `tools/voice/lines.py`. Waiting on Kenny's key.
-2. Phone play-test: 3D speed, mirrors, appointment times, level difficulty.
-3. Sharing the game with driver friends (Kenny decides when).
-4. Kenny should reset the Sketchfab token (it was once typed in the chat).
+1. Phone play-test: 3D speed, mirrors, appointment times, level difficulty.
+2. Sharing the game with driver friends (Kenny decides when).
+3. Kenny should reset the Sketchfab token (it was once typed in the chat).
