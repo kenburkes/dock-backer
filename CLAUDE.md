@@ -24,7 +24,10 @@ https://claude.ai/artifact/6mYuMU7RH767BtWEkmiU54 (publish updates to that same 
 ## Decisions so far
 
 - Name: Dock Backer. Separate project from New MC Load Board.
-- 11 levels, easiest to hardest (see README). Appointment windows from level 4 on.
+- 15 levels, easiest to hardest (see README). Appointment windows from level 4 on. Levels 12-15
+  (Kenny chose "more levels"): Kansas City intermodal (angled stall by a train), Iowa farm co-op
+  (grain bins), Denver snowstorm (snowbanks), Seattle pier (water edges are a fail). Each has its own
+  radio region (kc, farm, mountain, northwest). No double trailers: real drivers don't back doubles.
 - Trucks upgrade by level: Old Day Cab, Fleet Sleeper, Owner-Operator Mid-Roof, Big Sleeper,
   Long-Hood Show Truck.
 - Yard radio: a heckler per region (yard, Brooklyn, South, Texas, LA, Miami, Chicago); every

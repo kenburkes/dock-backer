@@ -436,6 +436,77 @@ function parkedRig(S,x,ry,i){
   S.solids.push({kind:'tractor',t:{x,y:ky,th:a,ph:a,delta:0,color:CABS[i%CABS.length]},poly:rect(x,ky,a,CF,CR,CHW),label:'a parked truck'});
   S.solids.push({poly:rect(x,ay,a,L2+TF,TR,THW),kind:'trailer',ax:x,ay,ang:a,color:TINTS[i%TINTS.length],label:'a parked truck'});
 }
+function sceneDenver(){
+  const S=base('night','snow','Ran into the yard fence.'); S.fence=true;
+  bldg(S,0,51,W,56,'the warehouse wall','warehouse','#2a3136',true);
+  doorRow(S,51,'Door ',11,[10,14,18,22,26,30,34]);
+  [13,14,16,17].forEach((n,i)=>S.solids.push(parkedAt(byNum(S,n),i)));
+  const bank=(x0,y0,x1,y1)=>S.solids.push({poly:AR(x0,y0,x1,y1),box:[x0,y0,x1,y1],kind:'snowbank',label:'a snowbank'});
+  S.top=3; bank(0,3,6,36); bank(38.5,3,44,31); bank(15,3,30,7); bank(7,10,15,18);
+  S.target={type:'dock',door:byNum(S,15)};
+  S.lights=[[6,36],[38,36],[22,9]];
+  S.paint=g=>{stallLines(g,S); oil(g,S);};
+  return S;
+}
+function scenePier(){
+  const S=base('day','rain','Splash! You drove off the pier.'); S.x0=9.5; S.x1=34.5; S.pier=true;
+  bldg(S,8,49,36,56,'the fish market','warehouse','#5b6670',true);
+  S.doors.push({x:14,y:49,ang:-90*DEG,label:'Door 1',num:1},{x:22,y:49,ang:-90*DEG,label:'Door 2',num:2},{x:30,y:49,ang:-90*DEG,label:'Door 3',num:3});
+  S.solids.push(parkedAt(S.doors[0],0));
+  for(let y=4;y<46;y+=7) for(const x of [10.1,33.9]) S.solids.push({poly:AR(x-.3,y-.3,x+.3,y+.3),kind:'bollard',x,y,label:'a mooring post'});
+  S.solids.push({poly:AR(30.5,30,34,34),box:[30.5,30,34,34],kind:'pallets',label:'the fish crates'});
+  S.solids.push({poly:AR(10.5,26,13.5,30),box:[10.5,26,13.5,30],kind:'pallets',label:'the fish crates'});
+  S.solids.push({poly:AR(10.5,8,13,11),box:[10.5,8,13,11],kind:'pallets',label:'the fish crates'});
+  S.target={type:'dock',door:S.doors[2]};
+  S.lights=[[9.2,10],[34.8,22],[9.2,40]];
+  S.paint=g=>{
+    g.fillStyle='#21465c'; g.fillRect(0,0,9.5,H); g.fillRect(34.5,0,W-34.5,H);
+    g.strokeStyle='rgba(255,255,255,.08)'; g.lineWidth=.06; for(let y=1;y<H;y+=2.3){line(g,.5,y,7,y+.4); line(g,37,y+1,43.5,y+1.4);}
+    g.fillStyle='rgba(120,95,70,.25)'; g.fillRect(9.5,0,25,49);
+    g.strokeStyle='rgba(0,0,0,.18)'; g.lineWidth=.04; for(let y=.6;y<49;y+=.6) line(g,9.5,y,34.5,y);
+    g.fillStyle='#4a3a2c'; g.fillRect(9.2,0,.3,H); g.fillRect(34.5,0,.3,H);
+    stallLines(g,S); oil(g,S);
+  };
+  return S;
+}
+function bin(S,x,y,r){const p=[]; for(let k=0;k<8;k++){const a=k/8*2*Math.PI+Math.PI/8; p.push([x+Math.cos(a)*r,y+Math.sin(a)*r]);} S.solids.push({poly:p,kind:'bin',x,y,r,label:'a grain bin'});}
+function sceneFarm(){
+  const S=base('day','clear','Ran into the fence.'); S.fence=true; S.farm=true;
+  bldg(S,0,49,26,56,'the packing shed','barn','#8a2f24',true);
+  S.doors.push({x:8,y:49,ang:-90*DEG,label:'Door 1',num:1},{x:17,y:49,ang:-90*DEG,label:'Door 2',num:2});
+  bin(S,34,46,4.5); bin(S,39,33.5,3.4); bin(S,7,24,3.6); bin(S,21,36,3.2);
+  S.target={type:'dock',door:S.doors[0]};
+  S.lights=[[24,6]];
+  S.paint=g=>{
+    g.fillStyle='#8c7a5e'; g.fillRect(0,0,W,H);
+    const R=rnd(77); for(let i=0;i<2600;i++){g.fillStyle=R()<.5?'rgba(255,255,255,.06)':'rgba(0,0,0,.12)'; const s=.05+R()*.12; g.fillRect(R()*W,R()*H,s,s);}
+    g.strokeStyle='rgba(60,45,30,.25)'; g.lineWidth=.3; for(const o of [-1,1]){g.beginPath(); g.moveTo(17+o,49); g.quadraticCurveTo(20+o,30,4+o,12); g.stroke();}
+    g.fillStyle='#4f6b35'; g.fillRect(26,49,W-26,7);
+    stallLines(g,S);
+  };
+  return S;
+}
+function sceneRail(){
+  const S=base('dusk','clear','Ran into the yard fence.'); S.fence=true; S.rail=true;
+  for(let y=.5;y<56;y+=16.6) S.solids.push({poly:AR(37.6,y,40.6,y+15.6),box:[37.6,y,40.6,y+15.6],kind:'railcar',label:'the freight train'});
+  S.solids.push({poly:AR(0,51.2,36,52.2),box:[0,51.2,36,52.2],kind:'barrier',label:'the concrete barrier'});
+  const n=[-Math.SQRT1_2,-Math.SQRT1_2], k0=1.6, stalls=[8,14,20,26,32];
+  stalls.forEach((x,i)=>{ if(x===20) return; const ax=x+n[0]*(k0+TR), ay=51.2+n[1]*(k0+TR), a=-135*DEG;
+    S.solids.push({poly:rect(ax,ay,a,L2+TF,TR,THW),kind:'trailer',ax,ay,ang:a,color:TINTS[i%TINTS.length],label:`the trailer in stall ${40+i}`}); });
+  const cx=20+n[0]*(k0+7.4), cy=51.2+n[1]*(k0+7.4);
+  S.target={type:'zone',trailerOnly:true,cx,cy,ang:-135*DEG,len:15.2,wid:3.8,p:[20+n[0]*(k0+.2),51.2+n[1]*(k0+.2)],label:'Stall 42'};
+  S.stalls=stalls; S.lights=[[2,24],[34,10]];
+  S.paint=g=>{
+    g.fillStyle='#3b3631'; g.fillRect(36.4,0,W-36.4,H);
+    g.fillStyle='#5a4632'; for(let y=0;y<H;y+=.7) g.fillRect(37.4,y,3.4,.3);
+    g.fillStyle='#9aa0a4'; g.fillRect(38.1,0,.12,H); g.fillRect(39.9,0,.12,H);
+    g.strokeStyle='rgba(255,255,255,.7)'; g.lineWidth=.12;
+    for(const x of [5,11,17,23,29,35]){const px=-n[1], py=n[0]; line(g,x,51.2,x+n[0]*16,51.2+n[1]*16);}
+    g.fillStyle='rgba(255,255,255,.6)'; g.textAlign='center'; g.textBaseline='middle'; g.font='800 1.1px "Big Shoulders Display", Impact, sans-serif';
+    stalls.forEach((x,i)=>g.fillText(String(40+i),x+n[0]*17.5,51.2+n[1]*17.5));
+  };
+  return S;
+}
 function sceneTruckStop(){
   const S=base('night','clear','Stay in the lot.');
   bldg(S,0,0,W,4.5,'the truck stop','store','#5a6168');
@@ -493,7 +564,19 @@ const LEVELS=[
   tip:'Use the whole street to set up. Get the trailer pointing straight down the alley before it reaches the corners.'},
  {id:'bk-bay',city:'Brooklyn, NY',name:'Warehouse Bay',build:sceneBrooklynBay,start:[36,17,0],par:5,limit:240,
   brief:'A narrow street with cars on both sides, and the bay door is on your blind side. Back into the bay without touching a car.',
-  tip:'Pull-ups are normal here. Small moves, check the guide, and reset early instead of late.'}
+  tip:'Pull-ups are normal here. Small moves, check the guide, and reset early instead of late.'},
+ {id:'rail',city:'Kansas City, MO',name:'Intermodal Ramp',build:sceneRail,start:[33,10,-90],par:2,limit:210,
+  brief:'A rail yard at dusk. Drop the trailer in angled Stall 42, between two trailers and right beside a parked freight train. Only the trailer has to be in the stall.',
+  tip:'Angled stalls need less swing. Start turning early and let the trailer ease into the angle.'},
+ {id:'farm',city:'Iowa',name:'Farm Co-op',build:sceneFarm,start:[24,12,0],par:2,limit:210,
+  brief:'A gravel yard at a farm co-op. Back the reefer into Door 1 of the packing shed, in the corner, threading between the grain bins.',
+  tip:'Grain bins are round, so they sneak up on the trailer corners. Watch the guide dots near the bins.'},
+ {id:'denver',city:'Denver, CO',name:'Snowed-In DC',build:sceneDenver,start:[33,22,0],par:3,limit:240,
+  brief:'A night snowstorm. The plows piled snow along the fences, the truck slides longer when you brake, and Door 15 sits between two parked trailers.',
+  tip:'Brake early, the snow is slick. Set up gently: the snowbanks leave less room to pull forward.'},
+ {id:'pier',city:'Seattle, WA',name:'Seafood Pier',build:scenePier,start:[24,14,0],par:5,limit:270,
+  brief:'A narrow pier with water on both sides. Back into Door 3 at the fish market on your blind side. Stay off the edges or it is a swim.',
+  tip:'The mooring posts mark the edge. Keep the trailer in the middle of the pier and use the mirrors on the blind side.'}
 ];
 
 // ---------- saved progress (this browser only) ----------
@@ -544,7 +627,7 @@ function won(t){
 function check(t){
   if(Math.abs(wrap(t.th-t.ph))>JACK) return {crash:'Jackknifed. The trailer folded too far against the tractor.'};
   const tp=trailerPoly(t), cp=tractorPoly(t);
-  for(const p of tp.concat(cp)) if(p[0]<0||p[0]>W||p[1]<S.top||p[1]>H) return {crash:S.edgeMsg};
+  for(const p of tp.concat(cp)) if(p[0]<(S.x0||0)||p[0]>(S.x1||W)||p[1]<S.top||p[1]>H) return {crash:S.edgeMsg};
   for(const s of S.soft){
     const hit=overlap(tp,s.poly)||overlap(cp,s.poly);
     if(hit&&!s.in){s.in=true; if(!s.hit){game.pen++; sfx(s.kind==='cone'?'cone':'curb'); game.hint=s.kind==='cone'?'Knocked over a cone.':'Up on the curb.'; game.hintHold=1.5;} if(s.kind==='cone') s.hit=true;}
@@ -809,6 +892,23 @@ function drawCar(g,s){
 function drawSolid(g,s,R){
   if(s.kind==='bldg'||s.kind==='tooth') drawBldg(g,s,R);
   else if(s.kind==='tractor'){drawTractor(g,s.t); drawCab(g,s.t);}
+  else if(s.kind==='snowbank'){
+    const [x0,y0,x1,y1]=s.box; g.save(); shade(g,.6,.6,.35); g.fillStyle='#e9eef2'; rr(g,x0,y0,x1-x0,y1-y0,.8); g.fill(); g.restore();
+    const R2=rnd(Math.floor(x0*7+y0)); for(let i=0;i<(x1-x0)*(y1-y0)/3;i++){const x=x0+.4+R2()*(x1-x0-.8), y=y0+.4+R2()*(y1-y0-.8), r=.4+R2()*1.2, gr=g.createRadialGradient(x-.2,y-.2,0,x,y,r); gr.addColorStop(0,'rgba(255,255,255,.9)'); gr.addColorStop(1,'rgba(190,205,220,.0)'); g.fillStyle=gr; g.fillRect(x-r,y-r,2*r,2*r);}
+    g.strokeStyle='rgba(120,135,150,.5)'; g.lineWidth=.08; rr(g,x0,y0,x1-x0,y1-y0,.8); g.stroke();
+  } else if(s.kind==='bollard'){
+    g.save(); shade(g,.15,.2,.5); g.fillStyle='#22272b'; g.beginPath(); g.arc(s.x,s.y,.3,0,6.283); g.fill(); g.restore();
+    g.fillStyle='#e2b02f'; g.beginPath(); g.arc(s.x,s.y,.14,0,6.283); g.fill();
+  } else if(s.kind==='bin'){
+    g.save(); shade(g,1.2,1.6,.45); g.fillStyle='#b9c0c5'; g.beginPath(); g.arc(s.x,s.y,s.r,0,6.283); g.fill(); g.restore();
+    for(let k=0;k<16;k++){const a=k/16*6.283; g.strokeStyle='rgba(0,0,0,.18)'; g.lineWidth=.05; line(g,s.x,s.y,s.x+Math.cos(a)*s.r,s.y+Math.sin(a)*s.r);}
+    const gr=g.createRadialGradient(s.x-s.r*.3,s.y-s.r*.3,0,s.x,s.y,s.r); gr.addColorStop(0,'rgba(255,255,255,.35)'); gr.addColorStop(1,'rgba(0,0,0,.15)'); g.fillStyle=gr; g.beginPath(); g.arc(s.x,s.y,s.r,0,6.283); g.fill();
+    g.fillStyle='#7d858b'; g.beginPath(); g.arc(s.x,s.y,s.r*.18,0,6.283); g.fill();
+  } else if(s.kind==='railcar'){
+    const [x0,y0,x1,y1]=s.box; g.save(); shade(g,.5,.6,.5); g.fillStyle='#2a2e32'; g.fillRect(x0,y0,x1-x0,y1-y0); g.restore();
+    const cc=['#b5432f','#2f6f9f','#c98a2b','#3f7f5a','#7a7f86'][Math.floor(y0)%5]; g.fillStyle=cc; g.fillRect(x0+.25,y0+1.2,x1-x0-.5,y1-y0-2.4);
+    g.fillStyle='rgba(0,0,0,.18)'; for(let y=y0+1.4;y<y1-1.2;y+=.35) g.fillRect(x0+.25,y,x1-x0-.5,.1);
+  }
   else if(s.kind==='barrier'){
     const [x0,y0,x1,y1]=s.box; g.save(); shade(g,.3,.4,.5); g.fillStyle='#a9aba7'; g.fillRect(x0,y0,x1-x0,y1-y0); g.restore();
     g.fillStyle='rgba(255,255,255,.25)'; g.fillRect(x0,y0+(y1-y0)*.35,x1-x0,(y1-y0)*.3);
@@ -1385,8 +1485,8 @@ function sfx(k){
   if(k==='air'&&typeof airPsi!=='undefined') airPsi=Math.max(92,airPsi-6);
 }
 // ---------- the yard radio: recorded lines, a different voice and way of talking in each region ----------
-const RADIO={"yard": {"pullup": [["This must be amateur night.", "yard-pullup-0.mp3"], ["Ain't no pie-eating contest!", "yard-pullup-1.mp3"], ["Get out and look, driver! G.O.A.L.!", "yard-pullup-2.mp3"], ["Take your time. I've only been waiting since Tuesday.", "yard-pullup-3.mp3"], ["My grandma backs better than that, and she drives a Buick.", "yard-pullup-4.mp3"]], "miss": [["That door's over here, buddy.", "yard-miss-0.mp3"], ["You're crooked as a dog's hind leg.", "yard-miss-1.mp3"], ["Close only counts in horseshoes, driver.", "yard-miss-2.mp3"]], "curb": [["Watch the curb! They just poured that.", "yard-curb-0.mp3"], ["Curb check! Somebody's buying new tires.", "yard-curb-1.mp3"]], "cone": [["That cone had a family, driver.", "yard-cone-0.mp3"], ["You just ran over a cone. Somebody saw that.", "yard-cone-1.mp3"]], "bump": [["Easy! You rang the dinner bell with that one.", "yard-bump-0.mp3"], ["Whoa! The forklift guy just spilled his coffee.", "yard-bump-1.mp3"]], "hitch": [["Keep cranking like that and you'll jackknife it.", "yard-hitch-0.mp3"], ["Straighten up before you tie it in a knot.", "yard-hitch-1.mp3"]], "slow": [["The ice cream in that reefer is melting, driver.", "yard-slow-0.mp3"], ["Any day now. Night shift ends at six.", "yard-slow-1.mp3"]], "crash": [["There goes your safety bonus.", "yard-crash-0.mp3"], ["Somebody get the accident report.", "yard-crash-1.mp3"]], "jack": [["You folded it like a lawn chair.", "yard-jack-0.mp3"]], "late": [["Too late, driver. They gave your door away.", "yard-late-0.mp3"]], "win": [["Now that's how you do it. Ten four.", "yard-win-0.mp3"], ["Smooth. Somebody's been doing this a while.", "yard-win-1.mp3"]], "sloppy": [["Well, it's in there. Ain't pretty, but it's in there.", "yard-sloppy-0.mp3"]]}, "nyc": {"pullup": [["Ay, ay, ay! What are you doin' out there?", "nyc-pullup-0.mp3"], ["You backin' in, or takin' the scenic route?", "nyc-pullup-1.mp3"], ["My cousin Vinny parks better than that, and he don't even drive!", "nyc-pullup-2.mp3"], ["Fuhgeddaboudit. Pull up and try again.", "nyc-pullup-3.mp3"], ["I seen better parkin' on the Belt Parkway at rush hour.", "nyc-pullup-4.mp3"]], "miss": [["Ay! The door's over here, genius!", "nyc-miss-0.mp3"], ["You're crooked like a slice of pizza, pal.", "nyc-miss-1.mp3"], ["What, you need a map? It's right there!", "nyc-miss-2.mp3"]], "curb": [["Ay! Get off the sidewalk! This ain't Times Square!", "nyc-curb-0.mp3"], ["You just hopped the curb. Real nice, pal.", "nyc-curb-1.mp3"]], "bump": [["Whoa! You tryin' to knock the building down, or what?", "nyc-bump-0.mp3"], ["Easy! The landlord's gonna hear that in Queens.", "nyc-bump-1.mp3"]], "hitch": [["Easy, easy! You're gonna bend that thing like a pretzel.", "nyc-hitch-0.mp3"], ["Straighten out. You're makin' me nervous here.", "nyc-hitch-1.mp3"]], "slow": [["Let's go, let's go! I got places to be!", "nyc-slow-0.mp3"], ["Ay, the meter's runnin', pal!", "nyc-slow-1.mp3"], ["My bagel's gettin' cold over here.", "nyc-slow-2.mp3"]], "crash": [["Oh, you gotta be kiddin' me!", "nyc-crash-0.mp3"], ["That's comin' outta your paycheck, pal.", "nyc-crash-1.mp3"]], "jack": [["Unbelievable! You jackknifed it on a one-way street!", "nyc-jack-0.mp3"]], "late": [["Too late, pal. The door's gone. Go get a slice.", "nyc-late-0.mp3"]], "win": [["Now that's what I'm talkin' about!", "nyc-win-0.mp3"], ["Look at you! Not bad for an out-of-towner.", "nyc-win-1.mp3"]], "sloppy": [["Eh. It's in there. I seen worse.", "nyc-sloppy-0.mp3"]]}, "south": {"pullup": [["Well, bless your heart. Try it again, sugar.", "south-pullup-0.mp3"], ["Lord have mercy, I could've walked it in faster.", "south-pullup-1.mp3"], ["Son, you're backin' up like a mule in a mud hole.", "south-pullup-2.mp3"], ["Y'all go on and try that again.", "south-pullup-3.mp3"]], "miss": [["Honey, that door's over yonder.", "south-miss-0.mp3"], ["You're crooked as a barbed-wire fence.", "south-miss-1.mp3"], ["Close, but no cigar, darlin'.", "south-miss-2.mp3"]], "curb": [["Whoa there! That curb ain't a speed bump, darlin'.", "south-curb-0.mp3"], ["You just climbed that curb like a possum up a tree.", "south-curb-1.mp3"]], "bump": [["Easy now! You fixin' to knock the whole building down?", "south-bump-0.mp3"], ["Mercy! You shook the pecans off the trees with that one.", "south-bump-1.mp3"]], "hitch": [["Slow down, son. You're foldin' it up like a pocketknife.", "south-hitch-0.mp3"], ["Ease off that wheel, sugar, before you tie it in a bow.", "south-hitch-1.mp3"]], "slow": [["Daylight's burnin', driver.", "south-slow-0.mp3"], ["We ain't got all day, sugar. Supper's at six.", "south-slow-1.mp3"]], "crash": [["Well, butter my biscuit. That's gonna leave a mark.", "south-crash-0.mp3"], ["Mercy! Somebody call the safety man.", "south-crash-1.mp3"]], "jack": [["You done jackknifed it! Bless your heart.", "south-jack-0.mp3"]], "late": [["Sorry, darlin'. They done gave your spot away.", "south-late-0.mp3"]], "win": [["Well, look at you! Smooth as sweet tea.", "south-win-0.mp3"], ["Now that's some fine drivin'. Your mama'd be proud.", "south-win-1.mp3"]], "sloppy": [["It ain't pretty, but it's in there.", "south-sloppy-0.mp3"], ["Well, you got there. Took the long way, but you got there.", "south-sloppy-1.mp3"]]}, "texas": {"pullup": [["Whoa, partner! Back that thing up like you mean it.", "texas-pullup-0.mp3"], ["Cowboy, I've seen cattle line up straighter than that.", "texas-pullup-1.mp3"], ["That's more pull-ups than boot camp, partner.", "texas-pullup-2.mp3"], ["Hold your horses and try 'er again.", "texas-pullup-3.mp3"]], "miss": [["That door's big as Texas, and you still missed it.", "texas-miss-0.mp3"], ["You're off by a country mile, partner.", "texas-miss-1.mp3"]], "curb": [["You just jumped that curb like a rodeo bull.", "texas-curb-0.mp3"], ["Whoa, cowboy! That curb ain't a cattle guard.", "texas-curb-1.mp3"]], "bump": [["Easy, cowboy! That's a dock, not a barn door.", "texas-bump-0.mp3"]], "hitch": [["Rein it in, partner. You're about to jackknife.", "texas-hitch-0.mp3"], ["Whoa, Nelly! Straighten that rig out.", "texas-hitch-1.mp3"]], "slow": [["Clock's tickin', cowboy. Get a move on.", "texas-slow-0.mp3"], ["Y'all are slower than molasses in January.", "texas-slow-1.mp3"]], "crash": [["Well, that tore it. Somebody call the boss man.", "texas-crash-0.mp3"], ["Hoo boy. That's gonna cost more than a new pair of boots.", "texas-crash-1.mp3"]], "jack": [["Jackknifed! You folded it like a tortilla.", "texas-jack-0.mp3"]], "late": [["Too late, partner. The store done closed the door.", "texas-late-0.mp3"]], "win": [["Yee-haw! Now that's how we do it in Texas.", "texas-win-0.mp3"], ["Smooth as a Sunday drive, partner.", "texas-win-1.mp3"]], "sloppy": [["Well, you got 'er done. Barely.", "texas-sloppy-0.mp3"]]}, "la": {"pullup": [["Dude. Take it from the top.", "la-pullup-0.mp3"], ["Bro, you're doing like, a twelve-point turn over here.", "la-pullup-1.mp3"], ["Totally not it, dude. Again.", "la-pullup-2.mp3"], ["Chill, bro. Breathe. Try it again.", "la-pullup-3.mp3"]], "miss": [["Dude, the door's like, right there.", "la-miss-0.mp3"], ["You're totally crooked, bro.", "la-miss-1.mp3"], ["Not even close, dude. Like, not even.", "la-miss-2.mp3"]], "curb": [["Whoa. Gnarly curb hit, bro.", "la-curb-0.mp3"]], "bump": [["Dude! Chill! You're gonna knock the market over.", "la-bump-0.mp3"], ["Bro, the whole produce section felt that.", "la-bump-1.mp3"]], "hitch": [["Bro, you're about to fold that thing in half.", "la-hitch-0.mp3"], ["Whoa, whoa. Straighten out, dude.", "la-hitch-1.mp3"]], "slow": [["Dude, the avocados are getting old over here.", "la-slow-0.mp3"], ["Traffic on the four oh five moves faster than you, bro.", "la-slow-1.mp3"]], "crash": [["Oh, dude. That is totally not chill.", "la-crash-0.mp3"], ["Bro. That's gonna be on the news.", "la-crash-1.mp3"]], "jack": [["Bro. You totally jackknifed it.", "la-jack-0.mp3"]], "late": [["Sorry, dude. They gave your dock away. Bummer.", "la-late-0.mp3"]], "win": [["Duuude! Totally nailed it.", "la-win-0.mp3"], ["That was so smooth, bro. Respect.", "la-win-1.mp3"]], "sloppy": [["It's in there, dude. Kinda.", "la-sloppy-0.mp3"]]}, "miami": {"pullup": [["Oye! What is this, bro?", "miami-pullup-0.mp3"], ["Ay, mi madre! Try it again, bro.", "miami-pullup-1.mp3"], ["Bro, you're dancing more than South Beach on a Saturday.", "miami-pullup-2.mp3"], ["Dale, dale! One more time!", "miami-pullup-3.mp3"]], "miss": [["Oye, the door is over here, bro!", "miami-miss-0.mp3"], ["You're more crooked than a palm tree in a hurricane.", "miami-miss-1.mp3"]], "curb": [["Ay! Watch the curb, bro!", "miami-curb-0.mp3"]], "bump": [["Easy, bro! You trying to knock the warehouse into the bay?", "miami-bump-0.mp3"]], "hitch": [["Cuidado, bro! You're gonna fold it in half.", "miami-hitch-0.mp3"], ["Ay, ay! Straighten it out!", "miami-hitch-1.mp3"]], "slow": [["Dale, dale! The ship's not gonna wait, bro.", "miami-slow-0.mp3"], ["It's hot out here, bro. My cafecito's getting cold.", "miami-slow-1.mp3"]], "crash": [["Ay, no! That's gonna cost you, bro.", "miami-crash-0.mp3"], ["Ay, Dios mío. Somebody call the boss.", "miami-crash-1.mp3"]], "jack": [["Ay, mi madre! You jackknifed it!", "miami-jack-0.mp3"]], "late": [["Too late, bro. The boat already left.", "miami-late-0.mp3"]], "win": [["Eso! That's how you do it, bro!", "miami-win-0.mp3"], ["Dale! Perfect, bro.", "miami-win-1.mp3"]], "sloppy": [["Bueno. It's in there. More or less.", "miami-sloppy-0.mp3"]]}, "chicago": {"pullup": [["Oh, jeez. What are ya doin' there?", "chicago-pullup-0.mp3"], ["Yous guys gotta pull up and try it again.", "chicago-pullup-1.mp3"], ["I seen better backin' on Lower Wacker, bud.", "chicago-pullup-2.mp3"], ["Come on, bud. Pull ahead and try 'er again.", "chicago-pullup-3.mp3"]], "miss": [["Hey, the door's over here, bud.", "chicago-miss-0.mp3"], ["You're more crooked than the Kennedy at rush hour.", "chicago-miss-1.mp3"]], "curb": [["Oh, jeez. You hopped the curb there.", "chicago-curb-0.mp3"], ["You're up on the sidewalk, bud. Get down from there.", "chicago-curb-1.mp3"]], "bump": [["Whoa! Easy on the building, bud!", "chicago-bump-0.mp3"]], "hitch": [["Careful there. You're gonna fold it like a deep dish.", "chicago-hitch-0.mp3"], ["Straighten out, bud, before ya jackknife it.", "chicago-hitch-1.mp3"]], "slow": [["Come on, bud. The L's faster than you.", "chicago-slow-0.mp3"], ["Let's go, bud. It's freezin' out here.", "chicago-slow-1.mp3"]], "crash": [["Oh, jeez Louise. That ain't good.", "chicago-crash-0.mp3"], ["Aw, nuts. Somebody call dispatch.", "chicago-crash-1.mp3"]], "jack": [["Jackknifed! Oh, for cryin' out loud.", "chicago-jack-0.mp3"]], "late": [["Too late, bud. Store's closed. Try again tomorrow.", "chicago-late-0.mp3"]], "win": [["Now dat's how ya do it, bud!", "chicago-win-0.mp3"], ["Beautiful. Real smooth there.", "chicago-win-1.mp3"]], "sloppy": [["Eh. It's in there. Good enough for the alley.", "chicago-sloppy-0.mp3"]]}};
-const REGION={straight:'yard',offset:'yard',alley:'yard',truckstop:'south',atlanta:'south',la:'la','bk-curb':'nyc',miami:'miami',dallas:'texas',chicago:'chicago','bk-bay':'nyc'};
+const RADIO={"yard": {"pullup": [["This must be amateur night.", "yard-pullup-0.mp3"], ["Ain't no pie-eating contest!", "yard-pullup-1.mp3"], ["Get out and look, driver! G.O.A.L.!", "yard-pullup-2.mp3"], ["Take your time. I've only been waiting since Tuesday.", "yard-pullup-3.mp3"], ["My grandma backs better than that, and she drives a Buick.", "yard-pullup-4.mp3"]], "miss": [["That door's over here, buddy.", "yard-miss-0.mp3"], ["You're crooked as a dog's hind leg.", "yard-miss-1.mp3"], ["Close only counts in horseshoes, driver.", "yard-miss-2.mp3"]], "curb": [["Watch the curb! They just poured that.", "yard-curb-0.mp3"], ["Curb check! Somebody's buying new tires.", "yard-curb-1.mp3"]], "cone": [["That cone had a family, driver.", "yard-cone-0.mp3"], ["You just ran over a cone. Somebody saw that.", "yard-cone-1.mp3"]], "bump": [["Easy! You rang the dinner bell with that one.", "yard-bump-0.mp3"], ["Whoa! The forklift guy just spilled his coffee.", "yard-bump-1.mp3"]], "hitch": [["Keep cranking like that and you'll jackknife it.", "yard-hitch-0.mp3"], ["Straighten up before you tie it in a knot.", "yard-hitch-1.mp3"]], "slow": [["The ice cream in that reefer is melting, driver.", "yard-slow-0.mp3"], ["Any day now. Night shift ends at six.", "yard-slow-1.mp3"]], "crash": [["There goes your safety bonus.", "yard-crash-0.mp3"], ["Somebody get the accident report.", "yard-crash-1.mp3"]], "jack": [["You folded it like a lawn chair.", "yard-jack-0.mp3"]], "late": [["Too late, driver. They gave your door away.", "yard-late-0.mp3"]], "win": [["Now that's how you do it. Ten four.", "yard-win-0.mp3"], ["Smooth. Somebody's been doing this a while.", "yard-win-1.mp3"]], "sloppy": [["Well, it's in there. Ain't pretty, but it's in there.", "yard-sloppy-0.mp3"]]}, "nyc": {"pullup": [["Ay, ay, ay! What are you doin' out there?", "nyc-pullup-0.mp3"], ["You backin' in, or takin' the scenic route?", "nyc-pullup-1.mp3"], ["My cousin Vinny parks better than that, and he don't even drive!", "nyc-pullup-2.mp3"], ["Fuhgeddaboudit. Pull up and try again.", "nyc-pullup-3.mp3"], ["I seen better parkin' on the Belt Parkway at rush hour.", "nyc-pullup-4.mp3"]], "miss": [["Ay! The door's over here, genius!", "nyc-miss-0.mp3"], ["You're crooked like a slice of pizza, pal.", "nyc-miss-1.mp3"], ["What, you need a map? It's right there!", "nyc-miss-2.mp3"]], "curb": [["Ay! Get off the sidewalk! This ain't Times Square!", "nyc-curb-0.mp3"], ["You just hopped the curb. Real nice, pal.", "nyc-curb-1.mp3"]], "bump": [["Whoa! You tryin' to knock the building down, or what?", "nyc-bump-0.mp3"], ["Easy! The landlord's gonna hear that in Queens.", "nyc-bump-1.mp3"]], "hitch": [["Easy, easy! You're gonna bend that thing like a pretzel.", "nyc-hitch-0.mp3"], ["Straighten out. You're makin' me nervous here.", "nyc-hitch-1.mp3"]], "slow": [["Let's go, let's go! I got places to be!", "nyc-slow-0.mp3"], ["Ay, the meter's runnin', pal!", "nyc-slow-1.mp3"], ["My bagel's gettin' cold over here.", "nyc-slow-2.mp3"]], "crash": [["Oh, you gotta be kiddin' me!", "nyc-crash-0.mp3"], ["That's comin' outta your paycheck, pal.", "nyc-crash-1.mp3"]], "jack": [["Unbelievable! You jackknifed it on a one-way street!", "nyc-jack-0.mp3"]], "late": [["Too late, pal. The door's gone. Go get a slice.", "nyc-late-0.mp3"]], "win": [["Now that's what I'm talkin' about!", "nyc-win-0.mp3"], ["Look at you! Not bad for an out-of-towner.", "nyc-win-1.mp3"]], "sloppy": [["Eh. It's in there. I seen worse.", "nyc-sloppy-0.mp3"]]}, "south": {"pullup": [["Well, bless your heart. Try it again, sugar.", "south-pullup-0.mp3"], ["Lord have mercy, I could've walked it in faster.", "south-pullup-1.mp3"], ["Son, you're backin' up like a mule in a mud hole.", "south-pullup-2.mp3"], ["Y'all go on and try that again.", "south-pullup-3.mp3"]], "miss": [["Honey, that door's over yonder.", "south-miss-0.mp3"], ["You're crooked as a barbed-wire fence.", "south-miss-1.mp3"], ["Close, but no cigar, darlin'.", "south-miss-2.mp3"]], "curb": [["Whoa there! That curb ain't a speed bump, darlin'.", "south-curb-0.mp3"], ["You just climbed that curb like a possum up a tree.", "south-curb-1.mp3"]], "bump": [["Easy now! You fixin' to knock the whole building down?", "south-bump-0.mp3"], ["Mercy! You shook the pecans off the trees with that one.", "south-bump-1.mp3"]], "hitch": [["Slow down, son. You're foldin' it up like a pocketknife.", "south-hitch-0.mp3"], ["Ease off that wheel, sugar, before you tie it in a bow.", "south-hitch-1.mp3"]], "slow": [["Daylight's burnin', driver.", "south-slow-0.mp3"], ["We ain't got all day, sugar. Supper's at six.", "south-slow-1.mp3"]], "crash": [["Well, butter my biscuit. That's gonna leave a mark.", "south-crash-0.mp3"], ["Mercy! Somebody call the safety man.", "south-crash-1.mp3"]], "jack": [["You done jackknifed it! Bless your heart.", "south-jack-0.mp3"]], "late": [["Sorry, darlin'. They done gave your spot away.", "south-late-0.mp3"]], "win": [["Well, look at you! Smooth as sweet tea.", "south-win-0.mp3"], ["Now that's some fine drivin'. Your mama'd be proud.", "south-win-1.mp3"]], "sloppy": [["It ain't pretty, but it's in there.", "south-sloppy-0.mp3"], ["Well, you got there. Took the long way, but you got there.", "south-sloppy-1.mp3"]]}, "texas": {"pullup": [["Whoa, partner! Back that thing up like you mean it.", "texas-pullup-0.mp3"], ["Cowboy, I've seen cattle line up straighter than that.", "texas-pullup-1.mp3"], ["That's more pull-ups than boot camp, partner.", "texas-pullup-2.mp3"], ["Hold your horses and try 'er again.", "texas-pullup-3.mp3"]], "miss": [["That door's big as Texas, and you still missed it.", "texas-miss-0.mp3"], ["You're off by a country mile, partner.", "texas-miss-1.mp3"]], "curb": [["You just jumped that curb like a rodeo bull.", "texas-curb-0.mp3"], ["Whoa, cowboy! That curb ain't a cattle guard.", "texas-curb-1.mp3"]], "bump": [["Easy, cowboy! That's a dock, not a barn door.", "texas-bump-0.mp3"]], "hitch": [["Rein it in, partner. You're about to jackknife.", "texas-hitch-0.mp3"], ["Whoa, Nelly! Straighten that rig out.", "texas-hitch-1.mp3"]], "slow": [["Clock's tickin', cowboy. Get a move on.", "texas-slow-0.mp3"], ["Y'all are slower than molasses in January.", "texas-slow-1.mp3"]], "crash": [["Well, that tore it. Somebody call the boss man.", "texas-crash-0.mp3"], ["Hoo boy. That's gonna cost more than a new pair of boots.", "texas-crash-1.mp3"]], "jack": [["Jackknifed! You folded it like a tortilla.", "texas-jack-0.mp3"]], "late": [["Too late, partner. The store done closed the door.", "texas-late-0.mp3"]], "win": [["Yee-haw! Now that's how we do it in Texas.", "texas-win-0.mp3"], ["Smooth as a Sunday drive, partner.", "texas-win-1.mp3"]], "sloppy": [["Well, you got 'er done. Barely.", "texas-sloppy-0.mp3"]]}, "la": {"pullup": [["Dude. Take it from the top.", "la-pullup-0.mp3"], ["Bro, you're doing like, a twelve-point turn over here.", "la-pullup-1.mp3"], ["Totally not it, dude. Again.", "la-pullup-2.mp3"], ["Chill, bro. Breathe. Try it again.", "la-pullup-3.mp3"]], "miss": [["Dude, the door's like, right there.", "la-miss-0.mp3"], ["You're totally crooked, bro.", "la-miss-1.mp3"], ["Not even close, dude. Like, not even.", "la-miss-2.mp3"]], "curb": [["Whoa. Gnarly curb hit, bro.", "la-curb-0.mp3"]], "bump": [["Dude! Chill! You're gonna knock the market over.", "la-bump-0.mp3"], ["Bro, the whole produce section felt that.", "la-bump-1.mp3"]], "hitch": [["Bro, you're about to fold that thing in half.", "la-hitch-0.mp3"], ["Whoa, whoa. Straighten out, dude.", "la-hitch-1.mp3"]], "slow": [["Dude, the avocados are getting old over here.", "la-slow-0.mp3"], ["Traffic on the four oh five moves faster than you, bro.", "la-slow-1.mp3"]], "crash": [["Oh, dude. That is totally not chill.", "la-crash-0.mp3"], ["Bro. That's gonna be on the news.", "la-crash-1.mp3"]], "jack": [["Bro. You totally jackknifed it.", "la-jack-0.mp3"]], "late": [["Sorry, dude. They gave your dock away. Bummer.", "la-late-0.mp3"]], "win": [["Duuude! Totally nailed it.", "la-win-0.mp3"], ["That was so smooth, bro. Respect.", "la-win-1.mp3"]], "sloppy": [["It's in there, dude. Kinda.", "la-sloppy-0.mp3"]]}, "miami": {"pullup": [["Oye! What is this, bro?", "miami-pullup-0.mp3"], ["Ay, mi madre! Try it again, bro.", "miami-pullup-1.mp3"], ["Bro, you're dancing more than South Beach on a Saturday.", "miami-pullup-2.mp3"], ["Dale, dale! One more time!", "miami-pullup-3.mp3"]], "miss": [["Oye, the door is over here, bro!", "miami-miss-0.mp3"], ["You're more crooked than a palm tree in a hurricane.", "miami-miss-1.mp3"]], "curb": [["Ay! Watch the curb, bro!", "miami-curb-0.mp3"]], "bump": [["Easy, bro! You trying to knock the warehouse into the bay?", "miami-bump-0.mp3"]], "hitch": [["Cuidado, bro! You're gonna fold it in half.", "miami-hitch-0.mp3"], ["Ay, ay! Straighten it out!", "miami-hitch-1.mp3"]], "slow": [["Dale, dale! The ship's not gonna wait, bro.", "miami-slow-0.mp3"], ["It's hot out here, bro. My cafecito's getting cold.", "miami-slow-1.mp3"]], "crash": [["Ay, no! That's gonna cost you, bro.", "miami-crash-0.mp3"], ["Ay, Dios mío. Somebody call the boss.", "miami-crash-1.mp3"]], "jack": [["Ay, mi madre! You jackknifed it!", "miami-jack-0.mp3"]], "late": [["Too late, bro. The boat already left.", "miami-late-0.mp3"]], "win": [["Eso! That's how you do it, bro!", "miami-win-0.mp3"], ["Dale! Perfect, bro.", "miami-win-1.mp3"]], "sloppy": [["Bueno. It's in there. More or less.", "miami-sloppy-0.mp3"]]}, "chicago": {"pullup": [["Oh, jeez. What are ya doin' there?", "chicago-pullup-0.mp3"], ["Yous guys gotta pull up and try it again.", "chicago-pullup-1.mp3"], ["I seen better backin' on Lower Wacker, bud.", "chicago-pullup-2.mp3"], ["Come on, bud. Pull ahead and try 'er again.", "chicago-pullup-3.mp3"]], "miss": [["Hey, the door's over here, bud.", "chicago-miss-0.mp3"], ["You're more crooked than the Kennedy at rush hour.", "chicago-miss-1.mp3"]], "curb": [["Oh, jeez. You hopped the curb there.", "chicago-curb-0.mp3"], ["You're up on the sidewalk, bud. Get down from there.", "chicago-curb-1.mp3"]], "bump": [["Whoa! Easy on the building, bud!", "chicago-bump-0.mp3"]], "hitch": [["Careful there. You're gonna fold it like a deep dish.", "chicago-hitch-0.mp3"], ["Straighten out, bud, before ya jackknife it.", "chicago-hitch-1.mp3"]], "slow": [["Come on, bud. The L's faster than you.", "chicago-slow-0.mp3"], ["Let's go, bud. It's freezin' out here.", "chicago-slow-1.mp3"]], "crash": [["Oh, jeez Louise. That ain't good.", "chicago-crash-0.mp3"], ["Aw, nuts. Somebody call dispatch.", "chicago-crash-1.mp3"]], "jack": [["Jackknifed! Oh, for cryin' out loud.", "chicago-jack-0.mp3"]], "late": [["Too late, bud. Store's closed. Try again tomorrow.", "chicago-late-0.mp3"]], "win": [["Now dat's how ya do it, bud!", "chicago-win-0.mp3"], ["Beautiful. Real smooth there.", "chicago-win-1.mp3"]], "sloppy": [["Eh. It's in there. Good enough for the alley.", "chicago-sloppy-0.mp3"]]}, "mountain": {"pullup": [["Whoa there, flatlander. Try that again.", "mountain-pullup-0.mp3"], ["That's a mile-high mess, driver.", "mountain-pullup-1.mp3"], ["You're sliding around like a skier on ice.", "mountain-pullup-2.mp3"], ["Brake early, bud. It's slick out here.", "mountain-pullup-3.mp3"]], "miss": [["Door fifteen's over here, mountain man.", "mountain-miss-0.mp3"], ["You're crooked as a switchback.", "mountain-miss-1.mp3"]], "bump": [["Easy! You'll start an avalanche.", "mountain-bump-0.mp3"]], "hitch": [["Careful, you'll fold it up like a camp chair.", "mountain-hitch-0.mp3"]], "slow": [["We'll be snowed in by the time you dock.", "mountain-slow-0.mp3"], ["Plow's coming back around, driver.", "mountain-slow-1.mp3"]], "crash": [["Well, that's one for the ditch.", "mountain-crash-0.mp3"]], "jack": [["Jackknifed in a snowstorm. Classic.", "mountain-jack-0.mp3"]], "late": [["Too late. They closed the dock for the storm.", "mountain-late-0.mp3"]], "win": [["Nice! Smooth as fresh powder.", "mountain-win-0.mp3"], ["Now that's mountain driving.", "mountain-win-1.mp3"]], "sloppy": [["You made it. The snow's covering the mess anyway.", "mountain-sloppy-0.mp3"]]}, "northwest": {"pullup": [["Hey, take it easy, man. Try it again.", "northwest-pullup-0.mp3"], ["The ferry docks straighter than that.", "northwest-pullup-1.mp3"], ["Oof. Grab a coffee and try again.", "northwest-pullup-2.mp3"], ["Watch the edge, buddy. That water's cold.", "northwest-pullup-3.mp3"]], "miss": [["Door three, buddy. That's door three.", "northwest-miss-0.mp3"], ["You're drifting like a log in the sound.", "northwest-miss-1.mp3"]], "bump": [["Whoa! You spooked the seagulls.", "northwest-bump-0.mp3"]], "hitch": [["Easy! You're folding it up like a road map.", "northwest-hitch-0.mp3"]], "slow": [["Fish don't stay fresh forever, man.", "northwest-slow-0.mp3"], ["Rain's not stopping, so neither should you.", "northwest-slow-1.mp3"]], "crash": [["Oof. That's gonna leave a mark on the pier.", "northwest-crash-0.mp3"]], "jack": [["Jackknifed on a pier. Bold move.", "northwest-jack-0.mp3"]], "late": [["Too late. The fish went out on another truck.", "northwest-late-0.mp3"]], "win": [["Nice. Smooth as a ferry landing.", "northwest-win-0.mp3"], ["There you go. Grab a coffee, you earned it.", "northwest-win-1.mp3"]], "sloppy": [["Well, you're dry, and it's docked.", "northwest-sloppy-0.mp3"]]}, "farm": {"pullup": [["Oh, for Pete's sake. Try her again.", "farm-pullup-0.mp3"], ["My combine backs better than that.", "farm-pullup-1.mp3"], ["Take your time. The corn's not going anywhere.", "farm-pullup-2.mp3"], ["Well, that's different. Pull ahead, hon.", "farm-pullup-3.mp3"]], "miss": [["Door one's over by the corner there.", "farm-miss-0.mp3"], ["You're crooked as a fence row.", "farm-miss-1.mp3"]], "bump": [["Easy! You'll knock the shed off its slab.", "farm-bump-0.mp3"]], "hitch": [["Careful there. You'll bend it up like a hay hook.", "farm-hitch-0.mp3"]], "slow": [["Chores won't do themselves, driver.", "farm-slow-0.mp3"], ["Supper's at five, you know.", "farm-slow-1.mp3"]], "crash": [["Oh, dear. That's gonna cost ya.", "farm-crash-0.mp3"]], "jack": [["Jackknifed! Well, that's a pickle.", "farm-jack-0.mp3"]], "late": [["Too late, hon. The crew went home.", "farm-late-0.mp3"]], "win": [["Well, look at that! Real nice.", "farm-win-0.mp3"], ["Now that's how ya do it out here.", "farm-win-1.mp3"]], "sloppy": [["Eh. Close enough for farm work.", "farm-sloppy-0.mp3"]]}, "kc": {"pullup": [["Come on, driver. Line it up like a train.", "kc-pullup-0.mp3"], ["Hey, this ain't the barbecue line. Try again.", "kc-pullup-1.mp3"], ["Pull up and give it another go.", "kc-pullup-2.mp3"]], "miss": [["Stall forty-two, driver. Right there.", "kc-miss-0.mp3"], ["You're crooked as the tracks at a switch.", "kc-miss-1.mp3"]], "bump": [["Easy! Don't derail the whole yard.", "kc-bump-0.mp3"]], "hitch": [["Watch it, that trailer's coming around on you.", "kc-hitch-0.mp3"]], "slow": [["The train leaves at six, with or without you.", "kc-slow-0.mp3"], ["Let's go, driver. The burnt ends are getting cold.", "kc-slow-1.mp3"]], "crash": [["Well, that's gonna hold up the whole ramp.", "kc-crash-0.mp3"]], "jack": [["Jackknifed by the tracks. That's a new one.", "kc-jack-0.mp3"]], "late": [["Too late, driver. The train already left.", "kc-late-0.mp3"]], "win": [["Smooth as Kansas City barbecue sauce.", "kc-win-0.mp3"], ["Right on the money, driver.", "kc-win-1.mp3"]], "sloppy": [["It's in. Don't tell the yard boss how.", "kc-sloppy-0.mp3"]]}};
+const REGION={rail:'kc',farm:'farm',denver:'mountain',pier:'northwest',straight:'yard',offset:'yard',alley:'yard',truckstop:'south',atlanta:'south',la:'la','bk-curb':'nyc',miami:'miami',dallas:'texas',chicago:'chicago','bk-bay':'nyc'};
 const cbEl=$('#cb'), lastLine={}, vbuf={}; let heckleAt=-99, cbTimer=null, voiceUntil=0, voiceSrc=null;
 const regionOf=()=>REGION[L&&L.id]||'yard';
 function loadLine(file){
@@ -1559,6 +1659,7 @@ function roofTex(color){
   return ctex(128,128,(g,w,h)=>{g.fillStyle=color; g.fillRect(0,0,w,h); const R=rnd(7); for(let i=0;i<1400;i++){g.fillStyle=R()<.5?'rgba(255,255,255,.06)':'rgba(0,0,0,.12)'; g.fillRect(R()*w,R()*h,1+R()*2,1+R()*2);}},true);
 }
 function bldgHeight(s,R){
+  if(s.style==='barn') return 7.5;
   if(s.kind==='tooth'||s.style==='warehouse') return L.id==='dallas'?10:9.5;
   if(s.style==='brownstone') return 12; if(s.style==='store') return 7;
   if(L.id==='chicago'&&s.box&&s.box[1]===0) return 6.5;
@@ -1929,7 +2030,7 @@ function car3D(par,s){
 }
 
 // ---------- shipping yards: dock fronts, concrete aprons, light towers, and a real horizon ----------
-const YARD_IDS=['straight','offset','alley','miami','la','dallas','atlanta','truckstop'];
+const YARD_IDS=['straight','offset','alley','miami','la','dallas','atlanta','truckstop','denver','rail','farm','pier'];
 function numberPlate(txt){
   return ctex(128,64,(g,w,h)=>{g.fillStyle='#1d3a6b'; g.fillRect(0,0,w,h); g.strokeStyle='#e9eef2'; g.lineWidth=4; g.strokeRect(4,4,w-8,h-8);
     g.fillStyle='#ffffff'; g.font='bold 40px "Big Shoulders Display",Impact,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(txt,w/2,h/2+2);});
@@ -1974,13 +2075,15 @@ function yardExtras3D(sc,R){
     const jm=new THREE.MeshBasicMaterial({color:'#000',transparent:true,opacity:.18,depthWrite:false});
     for(let x=x0+4;x<x1;x+=4){const l=new THREE.Mesh(new THREE.PlaneGeometry(.05,z1-z0),jm); l.rotation.x=-Math.PI/2; l.position.set(x,.006,(z0+z1)/2); sc.add(l);}
     for(let z=z0+4;z<z1;z+=4){const l=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,.05),jm); l.rotation.x=-Math.PI/2; l.position.set((x0+x1)/2,.006,z); sc.add(l);} };
-  if(['straight','offset','alley','miami'].includes(id)) apron(0,35,W,51);
+  if(['straight','offset','alley','miami','denver'].includes(id)) apron(0,35,W,51);
   if(id==='dallas') apron(12,4,28,34);
   // yard light towers in the corners
-  const masts={straight:[[2,40],[42,40],[2,6],[42,6]],offset:[[2,40],[42,40],[2,6],[42,6]],alley:[[2,40],[42,40],[2,6],[42,6]],miami:[[2,30],[42,30]],atlanta:[[-3,26],[47,26]],la:[[-3,30],[47,30]],truckstop:[[-3,30],[47,30]],dallas:[[9,52]]}[id]||[];
+  const masts={denver:[[42,40],[2,40]],rail:[[2,24],[34,4]],straight:[[2,40],[42,40],[2,6],[42,6]],offset:[[2,40],[42,40],[2,6],[42,6]],alley:[[2,40],[42,40],[2,6],[42,6]],miami:[[2,30],[42,30]],atlanta:[[-3,26],[47,26]],la:[[-3,30],[47,30]],truckstop:[[-3,30],[47,30]],dallas:[[9,52]]}[id]||[];
   masts.forEach(([x,y])=>mast3D(sc,x,y,16,lit));
   // beyond the fence: a drop lot of parked trailers, neighbor warehouses, tree lines
   const outerTrailers=(x0,y,n,ang)=>{for(let i=0;i<n;i++){const t=makeTrailer(TINTS[i%TINTS.length],false); t.position.set(x0+i*4,0,y); t.rotation.y=-ang; sc.add(t);}};
+  if(id==='denver'){ warehouse3D(sc,-70,-70,-10,-30,13,'#d9dee2'); warehouse3D(sc,55,-60,120,-25,11,'#dfe2e0'); }
+  if(id==='rail'){ warehouse3D(sc,-70,-60,-8,-20,12,'#d6d0c3'); outerTrailers(4,-4,8,Math.PI/2); }
   if(['straight','offset','alley'].includes(id)){ outerTrailers(4,-3.5,10,Math.PI/2); warehouse3D(sc,-70,-70,-10,-30,13); warehouse3D(sc,55,-60,120,-25,11,'#dfe2e0'); warehouse3D(sc,-80,10,-30,70,12,'#e6e3dc'); }
   if(id==='atlanta'){ warehouse3D(sc,-60,-60,-8,-25,12); warehouse3D(sc,55,-50,110,-15,11,'#dcdfdd'); }
   if(id==='la'){ warehouse3D(sc,-70,-50,-10,-12,10,'#e3d3bf'); warehouse3D(sc,55,-40,110,10,9,'#d9c9b2'); }
@@ -1996,7 +2099,7 @@ function yardExtras3D(sc,R){
     const sea=new THREE.Mesh(new THREE.PlaneGeometry(600,200),std('#2f5c74',{metalness:.3,roughness:.15})); sea.rotation.x=-Math.PI/2; sea.position.set(W/2,-.02,-160); sc.add(sea);
   }
   // tree line on the horizon
-  R3.trees=[]; if(id!=='miami') for(let i=0;i<26;i++){ const a=i/26*Math.PI*2, r=110+R()*30, n=sc.children.length; tree3D(sc,W/2+Math.cos(a)*r,H/2+Math.sin(a)*r,4+R()*2,R()<.4); const t=sc.children[n]; if(t){ t.traverse(o=>{o.castShadow=false;}); R3.trees.push(t); if(R3.q===0) t.visible=false; } }
+  R3.trees=[]; if(id!=='miami'&&id!=='pier') for(let i=0;i<26;i++){ const a=i/26*Math.PI*2, r=110+R()*30, n=sc.children.length; tree3D(sc,W/2+Math.cos(a)*r,H/2+Math.sin(a)*r,4+R()*2,R()<.4); const t=sc.children[n]; if(t){ t.traverse(o=>{o.castShadow=false;}); R3.trees.push(t); if(R3.q===0) t.visible=false; } }
 }
 
 // ---------- city streets: storefronts, fire escapes, street furniture and a skyline ----------
@@ -2047,10 +2150,10 @@ function streetFurniture(sc,R,x0,z0,x1,z1,edge){
     else { addBox(sc,cx-.3,cx+.3,.15,1.35,cz-.28,cz+.28,std('#2c4f8f',{roughness:.5,metalness:.2})); }
   }
 }
-function skyline(sc,R,lit,cx,cz,r0,r1,n){
+function skyline(sc,R,lit,cx,cz,r0,r1,n,a0,a1){
   const winTex=ctex(64,128,(g,w,h)=>{g.fillStyle='#5b6168'; g.fillRect(0,0,w,h); for(let y=6;y<h;y+=12) for(let x=4;x<w;x+=10){ g.fillStyle=lit&&Math.random()<.35?'#ffd58a':'#26303a'; g.fillRect(x,y,6,7);} },true);
   for(let i=0;i<n;i++){
-    const a=R()*Math.PI*2, r=r0+R()*(r1-r0), x=cx+Math.cos(a)*r, z=cz+Math.sin(a)*r, w=10+R()*18, d=10+R()*18, h=18+R()*55;
+    const a=a0!=null?a0+R()*(a1-a0):R()*Math.PI*2, r=r0+R()*(r1-r0), x=cx+Math.cos(a)*r, z=cz+Math.sin(a)*r, w=10+R()*18, d=10+R()*18, h=18+R()*55;
     const t=winTex.clone(); t.needsUpdate=true; t.repeat.set(Math.max(1,w/6),h/12);
     const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),std(['#8e8a84','#6f7377','#a39787','#7d6f66'][Math.floor(R()*4)],{map:t,roughness:.85,emissive:lit?'#ffffff':'#000000',emissiveMap:lit?t:null,emissiveIntensity:lit?.35:0}));
     m.position.set(x,h/2,z); sc.add(m);
@@ -2074,6 +2177,58 @@ function cityExtras3D(sc,R){
     fireEscapes(sc,R,18,26,18,50,1,0,15); fireEscapes(sc,R,26,26,26,50,-1,0,15);
     streetFurniture(sc,R,0,4,44,6.5,'z1'); streetFurniture(sc,R,0,21.5,18,24,'z0'); streetFurniture(sc,R,26,21.5,44,24,'z0');
     skyline(sc,R,lit,22,28,100,260,40);
+  }
+}
+
+// ---------- 3D for the new places: snowbanks, mooring posts, grain bins, the train, the pier and the farm ----------
+function newSolid3D(sc,s,R){
+  const M=R3.M;
+  if(s.kind==='snowbank'){
+    const [x0,y0,x1,y1]=s.box, sm=std('#eef2f6',{roughness:1}), g=new THREE.Group(); sc.add(g);
+    addBox(g,x0+.3,x1-.3,0,1.1,y0+.3,y1-.3,sm);
+    for(let i=0;i<Math.max(4,(x1-x0)*(y1-y0)/6);i++){const r=.8+R()*1.4, b=new THREE.Mesh(new THREE.IcosahedronGeometry(r,1),sm); b.scale.y=.55; b.position.set(x0+r*.6+R()*Math.max(.1,x1-x0-r*1.2),.7+R()*.5,y0+r*.6+R()*Math.max(.1,y1-y0-r*1.2)); b.castShadow=true; b.receiveShadow=true; g.add(b);}
+    return true;
+  }
+  if(s.kind==='bollard'){ addCyl(sc,.26,.9,'y',s.x,.45,s.y,std('#22272b',{metalness:.4,roughness:.6}),12); addCyl(sc,.33,.12,'y',s.x,.94,s.y,std('#e2b02f',{roughness:.6}),12); return true; }
+  if(s.kind==='bin'){
+    const h=8.5, g=new THREE.Group(); g.position.set(s.x,0,s.y); sc.add(g);
+    const wall=new THREE.Mesh(new THREE.CylinderGeometry(s.r,s.r,h,32,1,true),phMat('factory_wall',6,h/3,{color:'#dfe4e8',metalness:.6,roughness:.4,side:THREE.DoubleSide}));
+    wall.position.y=h/2; wall.castShadow=true; wall.receiveShadow=true; g.add(wall);
+    const roof=new THREE.Mesh(new THREE.ConeGeometry(s.r*1.03,s.r*.55,32),std('#c9ced2',{metalness:.7,roughness:.35})); roof.position.y=h+s.r*.275; roof.castShadow=true; g.add(roof);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(s.r+.05,.08,6,32),std('#9aa1a6',{metalness:.7})); ring.rotation.x=Math.PI/2; ring.position.y=h; g.add(ring);
+    addBox(g,s.r-.05,s.r+.35,.3,h+.8,-.25,.25,std('#6f777d',{metalness:.6}));
+    return true;
+  }
+  if(s.kind==='railcar'){
+    const [x0,y0,x1,y1]=s.box, cx=(x0+x1)/2, steel=std('#2b2f33',{metalness:.5,roughness:.6}), g=new THREE.Group(); sc.add(g);
+    addBox(g,x0,x1,.95,1.35,y0+.3,y1-.3,steel);
+    for(const yy of [y0+2,y1-2]){ addBox(g,cx-1.1,cx+1.1,.35,.95,yy-1.2,yy+1.2,steel); for(const dz of [-.75,.75]) for(const dx of [-.72,.72]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.18,16),M.steel); w.rotation.z=Math.PI/2; w.position.set(cx+dx,.42,yy+dz); g.add(w);} }
+    const cc=['#b5432f','#2f6f9f','#c98a2b','#3f7f5a','#7a7f86','#8c3b5e'];
+    for(let k=0;k<2;k++) addBox(g,cx-1.22,cx+1.22,1.35+k*2.6,1.35+k*2.6+2.58,y0+1.6,y1-1.6,phMat('container_side',1,4,{color:cc[Math.floor(R()*cc.length)],roughness:.6,metalness:.3}));
+    return true;
+  }
+  return false;
+}
+function placeExtras3D(sc,R){
+  const id=L.id, T=TH(), lit=T.time!=='day'||T.wet||T.fog;
+  if(S.pier){
+    const water=std('#244e63',{metalness:.35,roughness:.12});
+    for(const [x0,x1] of [[-300,S.x0],[S.x1,344]]){ const w=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,700),water); w.rotation.x=-Math.PI/2; w.position.set((x0+x1)/2,.03,H/2); w.receiveShadow=true; sc.add(w); }
+    const wood=std('#5a4430',{roughness:.9});
+    for(const x of [S.x0-.15,S.x1+.15]) addBox(sc,x-.15,x+.15,-.5,.25,0,49,wood);
+    for(let y=2;y<49;y+=4) for(const x of [S.x0-.4,S.x1+.4]) addCyl(sc,.22,2.4,'y',x,-.9,y,wood,10);
+    skyline(sc,R,lit,22,-60,40,120,22,Math.PI*1.15,Math.PI*1.85);
+  }
+  if(S.farm){
+    const field=std('#5f7a3a',{roughness:1}), soil=std('#6b5238',{roughness:1});
+    for(let i=0;i<28;i++){ const z=-8-i*2.2; addBox(sc,-60,W+60,0,.35,z,z+1.1,i%2?field:soil,false); }
+    const fence=std('#8a6a43',{roughness:.9}); for(let x=0;x<=W;x+=3) addBox(sc,x-.07,x+.07,0,1.3,-.1,.1,fence,false); addBox(sc,0,W,1.0,1.1,-.06,.06,fence,false);
+  }
+  if(S.rail){
+    const tie=std('#4a3a2b',{roughness:.95}), rail=std('#9aa0a4',{metalness:.8,roughness:.35});
+    for(let z=-120;z<180;z+=.7) addBox(sc,37.3,40.9,0,.12,z,z+.25,tie,false);
+    for(const x of [38.15,39.95]) addBox(sc,x-.04,x+.04,.12,.28,-120,180,rail,false);
+    for(const x of [45,49]){ for(let z=-120;z<180;z+=.7) addBox(sc,x-1.8,x+1.8,0,.12,z,z+.25,tie,false); for(const dx of [-.9,.9]) addBox(sc,x+dx-.04,x+dx+.04,.12,.28,-120,180,rail,false); }
   }
 }
 
@@ -2113,11 +2268,11 @@ function build3D(){
   sc.add(sun,sun.target);
   // ground
   const asp=T.snow?'asphalt_snow':'asphalt_02', wetCol=T.wet?'#7f878d':'#ffffff';
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(W,H),phMat(asp,W/3,H/3,{color:wetCol,roughness:T.wet?.32:.95,metalness:T.wet?.12:0}));
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(W,H),S.farm?phMat('gravel_concrete',W/3,H/3,{color:'#cdb38f',roughness:1}):phMat(asp,W/3,H/3,{color:wetCol,roughness:T.wet?.32:.95,metalness:T.wet?.12:0}));
   ground.rotation.x=-Math.PI/2; ground.position.set(W/2,0,H/2); ground.receiveShadow=true; sc.add(ground);
   const marks=new THREE.Mesh(new THREE.PlaneGeometry(W,H),new THREE.MeshStandardMaterial({map:groundTex(true),transparent:true,depthWrite:false,roughness:.75,polygonOffset:true,polygonOffsetFactor:-2}));
   marks.rotation.x=-Math.PI/2; marks.position.set(W/2,.01,H/2); marks.receiveShadow=true; sc.add(marks);
-  const outer=new THREE.Mesh(new THREE.PlaneGeometry(900,900),phMat(asp,300,300,{color:T.wet?'#666d72':'#9a9a96',roughness:1}));
+  const outer=new THREE.Mesh(new THREE.PlaneGeometry(900,900),S.farm?phMat('leafy_grass',220,220,{roughness:1}):phMat(asp,300,300,{color:T.wet?'#666d72':'#9a9a96',roughness:1}));
   outer.rotation.x=-Math.PI/2; outer.position.set(W/2,-.03,H/2); outer.receiveShadow=true; sc.add(outer);
   // sidewalks and curbs
   for(const s of S.soft) if(s.kind==='curb'){const [x0,y0,x1,y1]=s.box, side=std(T.walk,{roughness:.95}), top=phMat('concrete_pavement_02',(x1-x0)/1.8,(y1-y0)/1.8,{color:T.snow?'#ffffff':T.wet?'#a9adb0':'#e2e2dc'});
@@ -2132,7 +2287,7 @@ function build3D(){
       if(style==='brick'&&R()<.5) base='#7b4636';
       let [tn,tsz]=({warehouse:['factory_wall',3],brick:['red_brick_03',1.2],brownstone:['brown_brick_02',1.2],store:['beige_wall_001',3]})[style]||['factory_wall',3];
       if(style==='warehouse'&&['miami','la','dallas'].includes(L.id)){tn='beige_wall_001'; tsz=3;}
-      const tint=style==='warehouse'?({miami:'#f3ead8',la:'#e6d5bf',dallas:'#efe7da'}[L.id]||'#ffffff'):style==='brick'&&R()<.5?'#d9b8a8':'#ffffff';
+      const tint=style==='barn'?'#b0402f':style==='warehouse'?({miami:'#f3ead8',la:'#e6d5bf',dallas:'#efe7da'}[L.id]||'#ffffff'):style==='brick'&&R()<.5?'#d9b8a8':'#ffffff';
       const wallM=len=>phMat(tn,Math.max(1,len/tsz),h/tsz,{color:tint,roughness:.9});
       if(s.kind==='tooth'){
         const sh=new THREE.Shape(s.poly.map(p=>new THREE.Vector2(p[0],p[1])));
@@ -2142,7 +2297,7 @@ function build3D(){
         const w=x1-x0, d=y1-y0, rm=T.snow?std('#eef2f5',{roughness:1}):phMat('gravel_concrete',w/4,d/4,{color:'#b9b9b4',roughness:1});
         const me=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),[wallM(d),wallM(d),rm,M.dark,wallM(w),wallM(w)]);
         me.position.set((x0+x1)/2,h/2,(y0+y1)/2); me.castShadow=me.receiveShadow=true; sc.add(me);
-        if(style!=='warehouse') windows3D(sc,x0,y0,x1,y1,h,R,lit,style);
+        if(style!=='warehouse'&&style!=='barn') windows3D(sc,x0,y0,x1,y1,h,R,lit,style);
         { const F=fxTex(), am=keepMat(new THREE.MeshBasicMaterial({map:F.ao,transparent:true,depthWrite:false,color:'#000'}));
           for(const [cx,cz,len,rot] of [[(x0+x1)/2,y0,w,Math.PI],[(x0+x1)/2,y1,w,0],[x0,(y0+y1)/2,d,-Math.PI/2],[x1,(y0+y1)/2,d,Math.PI/2]]){
             const pl=new THREE.Mesh(new THREE.PlaneGeometry(len,1.6),am); pl.rotation.x=-Math.PI/2; pl.rotation.z=rot;
@@ -2166,6 +2321,7 @@ function build3D(){
       loadModel('concrete_road_barrier').then(m=>{ if(!m||R3.scene!==sc) return; bx.visible=false; const cy=(y0+y1)/2; for(let x=x0+.78;x<x1;x+=1.56){const o=m.clone(true); o.position.set(x,0,cy); sc.add(o);} });}
     else if(s.kind==='compactor'){const [x0,y0,x1,y1]=s.box; addBox(sc,x0,x1,0,2.4,y0,y1,std('#2f5a3e',{roughness:.6,metalness:.3}));}
     else if(s.kind==='pole') lamp3D(sc,s.x,s.y,true);
+    else if(newSolid3D(sc,s,R)){}
     else if(s.kind==='island'){const [x0,y0,x1,y1]=s.box; addBox(sc,x0,x1,0,.22,y0,y1,M.concrete); for(let x=x0+2;x<x1;x+=4) addBox(sc,x,x+.8,.22,2.0,y0+.6,y0+1.4,std('#c2372c',{roughness:.5}));}
   }
   // dock doors, seals, bumpers and lights
@@ -2211,6 +2367,7 @@ function build3D(){
   });
   decor3D(sc,R);
   yardExtras3D(sc,R);
+  placeExtras3D(sc,R);
   cityExtras3D(sc,R);
   // our truck
   const style=truck.style||TRUCKS[0];

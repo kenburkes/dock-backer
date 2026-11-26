@@ -88,3 +88,51 @@ LINES={
 VOICES={'yard':('sam-medium',1.0,1.0),'south':('norman-medium',.86,.95),'texas':('joe-medium',.9,.92),
  'nyc':('john-medium',1.14,1.0),'la':('bryce-medium',.93,1.0),'miami':('joe-medium',1.1,1.05),'chicago':('bryce-medium',1.04,.94)}
 SAY={"G.O.A.L.":"goal","Fuhgeddaboudit":"Forget about it","Duuude":"Doooode","'er ":"her ","'er.":"her.","dat's":"that's","Oye":"Oy-eh","Dale":"Dah-leh","dale":"dah-leh","Eso":"Eh-so","Cuidado":"Kwee-dah-doh","mi madre":"mee mah-dreh","Bueno":"Bweh-no","Yous":"Youse","Dios mío":"Dee-ohs mee-oh","cafecito":"kah-feh-see-toh","ya ":"ya "}
+
+LINES.update({
+ 'mountain':{
+  'pullup':["Whoa there, flatlander. Try that again.","That's a mile-high mess, driver.","You're sliding around like a skier on ice.","Brake early, bud. It's slick out here."],
+  'miss':["Door fifteen's over here, mountain man.","You're crooked as a switchback."],
+  'bump':["Easy! You'll start an avalanche."],
+  'hitch':["Careful, you'll fold it up like a camp chair."],
+  'slow':["We'll be snowed in by the time you dock.","Plow's coming back around, driver."],
+  'crash':["Well, that's one for the ditch."],
+  'jack':["Jackknifed in a snowstorm. Classic."],
+  'late':["Too late. They closed the dock for the storm."],
+  'win':["Nice! Smooth as fresh powder.","Now that's mountain driving."],
+  'sloppy':["You made it. The snow's covering the mess anyway."]},
+ 'northwest':{
+  'pullup':["Hey, take it easy, man. Try it again.","The ferry docks straighter than that.","Oof. Grab a coffee and try again.","Watch the edge, buddy. That water's cold."],
+  'miss':["Door three, buddy. That's door three.","You're drifting like a log in the sound."],
+  'bump':["Whoa! You spooked the seagulls."],
+  'hitch':["Easy! You're folding it up like a road map."],
+  'slow':["Fish don't stay fresh forever, man.","Rain's not stopping, so neither should you."],
+  'crash':["Oof. That's gonna leave a mark on the pier."],
+  'jack':["Jackknifed on a pier. Bold move."],
+  'late':["Too late. The fish went out on another truck."],
+  'win':["Nice. Smooth as a ferry landing.","There you go. Grab a coffee, you earned it."],
+  'sloppy':["Well, you're dry, and it's docked."]},
+ 'farm':{
+  'pullup':["Oh, for Pete's sake. Try her again.","My combine backs better than that.","Take your time. The corn's not going anywhere.","Well, that's different. Pull ahead, hon."],
+  'miss':["Door one's over by the corner there.","You're crooked as a fence row."],
+  'bump':["Easy! You'll knock the shed off its slab."],
+  'hitch':["Careful there. You'll bend it up like a hay hook."],
+  'slow':["Chores won't do themselves, driver.","Supper's at five, you know."],
+  'crash':["Oh, dear. That's gonna cost ya."],
+  'jack':["Jackknifed! Well, that's a pickle."],
+  'late':["Too late, hon. The crew went home."],
+  'win':["Well, look at that! Real nice.","Now that's how ya do it out here."],
+  'sloppy':["Eh. Close enough for farm work."]},
+ 'kc':{
+  'pullup':["Come on, driver. Line it up like a train.","Hey, this ain't the barbecue line. Try again.","Pull up and give it another go."],
+  'miss':["Stall forty-two, driver. Right there.","You're crooked as the tracks at a switch."],
+  'bump':["Easy! Don't derail the whole yard."],
+  'hitch':["Watch it, that trailer's coming around on you."],
+  'slow':["The train leaves at six, with or without you.","Let's go, driver. The burnt ends are getting cold."],
+  'crash':["Well, that's gonna hold up the whole ramp."],
+  'jack':["Jackknifed by the tracks. That's a new one."],
+  'late':["Too late, driver. The train already left."],
+  'win':["Smooth as Kansas City barbecue sauce.","Right on the money, driver."],
+  'sloppy':["It's in. Don't tell the yard boss how."]},
+})
+VOICES.update({'mountain':('sam-medium',.95,.97),'northwest':('bryce-medium',1.0,1.02),'farm':('norman-medium',.92,1.0),'kc':('john-medium',.98,.96)})

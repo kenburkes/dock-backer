@@ -35,6 +35,10 @@ To try it on a computer: `npx serve .` (or `python3 -m http.server`) in this fol
 | 9 | Dallas, Store Dock (blind side) | 3 | 3:30 |
 | 10 | Chicago, Alley Back-In | 5 | 4:00 |
 | 11 | Brooklyn, Warehouse Bay (blind side) | 5 | 4:00 |
+| 12 | Kansas City, Intermodal Ramp (angled stall by a train) | 2 | 3:30 |
+| 13 | Iowa, Farm Co-op (grain bins, gravel) | 2 | 3:30 |
+| 14 | Denver, Snowed-In DC (snowbanks, slick braking) | 3 | 4:00 |
+| 15 | Seattle, Seafood Pier (water on both sides) | 5 | 4:30 |
 
 Pars come from `tools/tests/solve-level.js`, which searches for the fewest pull-ups using only
 gentle turns (no sharper than 50 degrees). Easy levels get par = best + 1, the street levels best + 2.
