@@ -194,7 +194,7 @@ const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 const W=44, H=56;
 // Tractor: kingpin sits on the drive axles. Trailer: kingpin to trailer axles L2.
 const L1=4.0, L2=10.5, TF=1.0, TR=2.4, THW=1.3, CF=5.2, CR=1.6, CHW=1.25;
-const MAXD=36*DEG, JACK=75*DEG, STEER_RATE=70*DEG, VF=4.0, VR=-1.5;
+const MAXD=36*DEG, JACK=75*DEG, STEER_RATE=70*DEG, VF=5.5, VR=-1.8;
 const TOL={gap:.5, lat:.5, ang:5*DEG};
 const M2FT=3.281;
 const TINTS=['#d9dde0','#c9d0d6','#e3e1da','#cfd6d2','#d4d4dc','#dde3e6'];
@@ -566,7 +566,7 @@ function physics(dt){
   truck.delta=clamp(truck.delta,-MAXD,MAXD);
   const tgt=dir===1?VF:dir===-1?VR:0;
   if(dir===0||truck.v*dir<0){const b=(S.T.wet||S.T.snow?4.2:7)*dt; truck.v=Math.abs(truck.v)<=b?0:truck.v-Math.sign(truck.v)*b;}
-  else {const a=2.4*dt; truck.v+=clamp(tgt-truck.v,-a,a);}
+  else {const a=3.0*dt; truck.v+=clamp(tgt-truck.v,-a,a);}
   if(truck.v===0) return;
   game.started=true;
   const n=Math.max(1,Math.ceil(Math.abs(truck.v*dt)/.03)), h=dt/n;
@@ -1174,7 +1174,7 @@ function showMenu(){
     <p class="lede">Back a reefer trailer into tight spots across the country: grocery warehouses, a Brooklyn curb, an LA produce market, a Miami port and a Chicago alley.</p>
     <div class="levels">${rows}</div>
     <p class="keys">3 stars: par pull-ups or fewer, nothing touched. Keyboard: ↑ forward, ↓ reverse, ← → steer, C centers the wheel, R restarts, V changes the camera.</p>
-    <p class="keys">3D skies, textures and street props: Poly Haven (CC0). Truck: "Semi Truck Baked" by 3DE_Study. Trailer: "53\u2019 Reefer Trailer" by mcskinssketchfab. Cars: "Generic passenger car pack" by Comrade1280. Models from Sketchfab, CC BY 4.0.</p>
+    <p class="keys">3D skies, textures and street props: Poly Haven (CC0). Trucks: "Semi Truck Baked" by 3DE_Study, "semi truck" by taeemtasbi. Trailer: "53\u2019 Reefer Trailer" by mcskinssketchfab. Cars: "Generic passenger car pack" by Comrade1280. Models from Sketchfab, CC BY 4.0.</p>
     <div class="row"><button class="btn" data-act="chatter">Yard radio: ${save.chatter?'On':'Off'}</button></div>
     ${game.mode==='paused'?'<div class="row"><button class="btn primary" data-act="resume">Keep playing</button><button class="btn" data-act="retry">Restart level</button></div>':''}`);
 }
@@ -1740,8 +1740,8 @@ function loadGLTF(path){
 }
 function loadVehicles(){
   if(VEH.p) return VEH.p;
-  VEH.p=Promise.all([loadGLTF('models/cabover/cabover.gltf'),loadGLTF('models/reefer/reefer.gltf'),loadGLTF('models/cars/cars.gltf')]).then(([c,r,k])=>{
-    VEH.cab=c; VEH.reefer=r; VEH.cars=k?carProtos(k):null; VEH.ready=true;
+  VEH.p=Promise.all([loadGLTF('models/cabover/cabover.gltf'),loadGLTF('models/reefer/reefer.gltf'),loadGLTF('models/cars/cars.gltf'),loadGLTF('models/longhood/longhood.gltf')]).then(([c,r,k,lh])=>{
+    VEH.cab=c; VEH.reefer=r; VEH.cars=k?carProtos(k):null; VEH.longhood=lh?prepLonghood(lh):null; VEH.ready=true;
     if(R3&&R3.scene&&viewMode!=='map') build3D();
   });
   return VEH.p;
@@ -1764,6 +1764,56 @@ function paintedMap(map,key,mat){
   const t=new THREE.CanvasTexture(c); t.flipY=map.flipY; t.encoding=THREE.sRGBEncoding; t.anisotropy=8; FX.keep=FX.keep||new Set(); FX.keep.add(t);
   return PAINT_CACHE[key]=t;
 }
+// the long-hood tractor for the top levels: own paint, chrome, glass and rubber; front wheels cut out so they steer
+const LH_MATS={paint:['aiStandardSurface2SG','aiStandardSurface3SG','aiStandardSurface4SG'],chrome:['blinn1SG','blinn2SG','phong1SG'],brushed:['lowchromeSG'],glass:['glassSG'],rubber:['lambert3SG'],amber:['phong2SG'],plate:['numplatextSG']};
+const LH_S=[.28,.30,.24], LH_OFF=8.5*.24;
+function splitTris(mesh,keep){
+  const g=mesh.geometry, idx=g.index?g.index.array:null, pos=g.attributes.position, n=idx?idx.length:pos.count;
+  const a=[],b=[], v=new THREE.Vector3(), c=new THREE.Vector3();
+  for(let i=0;i<n;i+=3){ c.set(0,0,0); for(let k=0;k<3;k++){ v.fromBufferAttribute(pos,idx?idx[i+k]:i+k); c.add(v);} c.multiplyScalar(1/3).applyMatrix4(mesh.matrix);
+    (keep(c)?a:b).push(idx?idx[i]:i,idx?idx[i+1]:i+1,idx?idx[i+2]:i+2); }
+  if(!a.length) return null;
+  const ga=g.clone(); ga.setIndex(a); g.setIndex(b); ga.userData.keep=true; return ga;
+}
+function prepLonghood(scene){
+  scene.updateMatrixWorld(true);
+  const meshes=[]; scene.traverse(o=>{ if(o.isMesh) meshes.push(o); });
+  const front=[];
+  for(const m of meshes){ const nm=m.material.name;
+    if(nm==='lambert3SG'||nm==='blinn2SG'){ for(const side of [-1,1]){ const ga=splitTris(m,c=>c.z>9.2&&Math.sign(c.x)===side); if(ga) front.push({side,geo:ga,mat:nm,parent:m.parent,matrix:m.matrix.clone()}); } }
+  }
+  scene.userData.front=front; return scene;
+}
+function lhMaterial(nm,paint){
+  const has=k=>LH_MATS[k].includes(nm);
+  if(has('paint')) return paint;
+  if(has('chrome')) return keepMat(std('#eef1f3',{metalness:1,roughness:.12}));
+  if(has('brushed')) return keepMat(std('#c9ced2',{metalness:.9,roughness:.35}));
+  if(has('glass')) return keepMat(std('#0c141c',{metalness:.7,roughness:.06,transparent:true,opacity:.6}));
+  if(has('rubber')) return keepMat(std('#151617',{roughness:.95}));
+  if(has('amber')) return keepMat(new THREE.MeshStandardMaterial({color:'#7a4a10',emissive:'#ffad3a',emissiveIntensity:.7}));
+  if(has('plate')) return keepMat(std('#dedede',{roughness:.6}));
+  return keepMat(std('#2a2e32',{metalness:.4,roughness:.6}));
+}
+const LH_PAINT={};
+function longhoodTractor(color,ours){
+  const g=new THREE.Group(), m=VEH.longhood.clone(true);
+  m.rotation.y=Math.PI/2; m.scale.set(LH_S[0],LH_S[1],LH_S[2]); m.position.set(LH_OFF,0,0); g.add(m);
+  const paint=LH_PAINT[color]||(LH_PAINT[color]=keepMat(new THREE.MeshPhysicalMaterial({color,metalness:.45,roughness:.28,clearcoat:1,clearcoatRoughness:.05})));
+  m.traverse(o=>{ if(o.isMesh) o.material=lhMaterial(o.material.name,paint); });
+  g.userData.steer=[];
+  for(const side of [-1,1]){
+    const parts=VEH.longhood.userData.front.filter(f=>f.side===side); if(!parts.length) continue;
+    const pv=new THREE.Group(); pv.rotation.order='YXZ'; pv.position.set(side*3.6,1.9,12.8); m.add(pv);
+    for(const f of parts){ const me=new THREE.Mesh(f.geo,lhMaterial(f.mat,paint)); me.applyMatrix4(f.matrix); me.position.sub(pv.position); me.castShadow=true; pv.add(me); }
+    g.userData.steer.push(pv); if(ours) (R3.spin||(R3.spin=[])).push({o:pv,r:1.9,ax:'x'});
+  }
+  contactShadow(g,-1.4,6.0,-1.3,1.3,.85);
+  const head=[]; for(const s of [-1,1]){const sp=new THREE.SpotLight('#fff2d6',0,40,.5,.6,1.2); sp.position.set(5.9,1.0,s*.85); sp.target.position.set(18,0,s*1.5); g.add(sp,sp.target); head.push(sp);}
+  Object.assign(g.userData,{head,front:5.9,headY:1.0,eyeX:3.8,eyeY:2.3,mirX:4.3,mirY:2.1,mirZ:1.4,showHood:true});
+  return g;
+}
+
 const CAB_S=.6, CAB_OFF=3.475*.6;
 function cabTractor(paintIdx,ours){
   const g=new THREE.Group(), m=VEH.cab.clone(true);
@@ -1782,7 +1832,7 @@ function cabTractor(paintIdx,ours){
   }
   contactShadow(g,-1.7,4.9,-1.3,1.3,.85);
   const head=[]; for(const s of [-1,1]){const sp=new THREE.SpotLight('#fff2d6',0,40,.5,.6,1.2); sp.position.set(4.8,1.0,s*.85); sp.target.position.set(18,0,s*1.5); g.add(sp,sp.target); head.push(sp);}
-  g.userData.head=head; g.userData.front=4.75; g.userData.headY=.95;
+  Object.assign(g.userData,{head,front:4.75,headY:.95,eyeX:3.75,eyeY:2.55,mirX:4.45,mirY:2.3,mirZ:1.62});
   return g;
 }
 const REEF_S=1.092;
@@ -1820,7 +1870,9 @@ function carProtos(scene){
   return protos.length?protos:null;
 }
 function makeTractor(st,color,ours){
-  if(VEH.cab){ const idx=ours?tierOf(li):[1,2,3,0][Math.floor((color||'').length+((color||'').charCodeAt(2)||0))%4]; return cabTractor(idx,ours); }
+  const t=tierOf(li), pick=Math.floor((color||'').length+((color||'').charCodeAt(2)||0));
+  if(VEH.longhood&&(ours?t>=3:pick%3===0)) return longhoodTractor(ours?(t===4?'#f1eee6':'#111316'):color||'#7a1414',ours);
+  if(VEH.cab){ const idx=ours?t:[1,2,3,0][pick%4]; return cabTractor(idx,ours); }
   return makeTractorBox(st,color,ours);
 }
 function makeTrailer(color,ours){ return VEH.reefer?reeferTrailer(color,ours):makeTrailerBox(color,ours); }
@@ -1899,7 +1951,7 @@ function yardExtras3D(sc,R){
     const sea=new THREE.Mesh(new THREE.PlaneGeometry(600,200),std('#2f5c74',{metalness:.3,roughness:.15})); sea.rotation.x=-Math.PI/2; sea.position.set(W/2,-.02,-160); sc.add(sea);
   }
   // tree line on the horizon
-  if(id!=='miami') for(let i=0;i<40;i++){ const a=i/40*Math.PI*2, r=110+R()*30; tree3D(sc,W/2+Math.cos(a)*r,H/2+Math.sin(a)*r,4+R()*2,R()<.4); }
+  R3.trees=[]; if(id!=='miami') for(let i=0;i<26;i++){ const a=i/26*Math.PI*2, r=110+R()*30, n=sc.children.length; tree3D(sc,W/2+Math.cos(a)*r,H/2+Math.sin(a)*r,4+R()*2,R()<.4); const t=sc.children[n]; if(t){ t.traverse(o=>{o.castShadow=false;}); R3.trees.push(t); if(R3.q===0) t.visible=false; } }
 }
 
 function build3D(){
@@ -1934,7 +1986,7 @@ function build3D(){
   const sun=new THREE.DirectionalLight(night?'#8ea6ff':dusk?'#ffae74':'#fff2dc',night?.12:dusk?.85:T.wet||T.fog?.45:1.55);
   const sd=dusk?new THREE.Vector3(-1,.35,-.5):new THREE.Vector3(-.55,1,-.35);
   sun.position.set(W/2+sd.x*60,sd.y*60,H/2+sd.z*60); sun.target.position.set(W/2,0,H/2);
-  sun.castShadow=!night; sun.shadow.mapSize.set(2048,2048); const cs=sun.shadow.camera; cs.left=-42; cs.right=42; cs.top=42; cs.bottom=-42; cs.near=1; cs.far=200; sun.shadow.bias=-.0005; sun.shadow.normalBias=.03;
+  R3.sun=sun; sun.castShadow=!night&&R3.q!==0; sun.shadow.mapSize.set(R3.q===1?1024:2048,R3.q===1?1024:2048); const cs=sun.shadow.camera; cs.left=-42; cs.right=42; cs.top=42; cs.bottom=-42; cs.near=1; cs.far=200; sun.shadow.bias=-.0005; sun.shadow.normalBias=.03;
   sc.add(sun,sun.target);
   // ground
   const asp=T.snow?'asphalt_snow':'asphalt_02', wetCol=T.wet?'#7f878d':'#ffffff';
@@ -2084,6 +2136,18 @@ function decor3D(sc,R){
     for(let x=6;x<40;x+=8) addBox(sc,x,x+.35,0,5.2,7.1,7.45,std('#c9ccce',{metalness:.4}));
   }
 }
+let fAvg=1/60, qT=0;
+function autoQuality(dt){
+  if(!R3||!R3.scene||viewMode==='map'||!dt) return;
+  fAvg+=(dt-fAvg)*.05; qT+=dt; if(qT<2.5) return; qT=0;
+  const q=R3.q==null?2:R3.q;
+  if(fAvg>1/24&&q>0){
+    R3.q=q-1;
+    if(R3.q===1){ R3.renderer.setPixelRatio(1); if(R3.sun){R3.sun.shadow.mapSize.set(1024,1024); if(R3.sun.shadow.map){R3.sun.shadow.map.dispose(); R3.sun.shadow.map=null;}} }
+    if(R3.q===0){ R3.renderer.setPixelRatio(.75); if(R3.sun) R3.sun.castShadow=false; if(R3.trees) R3.trees.forEach(t=>t.visible=false); }
+    resize3D(); fAvg=1/40;
+  }
+}
 function render3D(ts,dt){
   const r=R3; if(!r||!r.scene) return;
   const T=TH(), [ax,ay]=axle(truck);
@@ -2117,8 +2181,8 @@ function render3D(ts,dt){
     for(const [out,side] of [[1.2,0],[2.5,1.5],[4,2.5]]){const x=px+nx*out-ny*side, y=py+ny*out+nx*side; if(!inside(x,y)){sx=x; sy=y; break;}}
     pos=new THREE.Vector3(sx,7.5,sy); look=new THREE.Vector3((rx*2+truck.x)/3,1.5,(ry*2+truck.y)/3); fov=55;
   } else {
-    const Gm=cabGeom(truck.style||TRUCKS[0]), real=!!VEH.cab, ex0=real?3.75:Gm.w1-.45, [ex,ey]=toWorld(truck,ex0,-.55), [lx,ly]=toWorld(truck,ex0+12,-.4);
-    pos=new THREE.Vector3(ex,real?2.55:2.62,ey); look=new THREE.Vector3(lx,real?1.35:1.0,ly); fov=72;
+    const Gm=cabGeom(truck.style||TRUCKS[0]), U=r.tractor.userData, real=!!U.eyeX, ex0=real?U.eyeX:Gm.w1-.45, [ex,ey]=toWorld(truck,ex0,-.55), [lx,ly]=toWorld(truck,ex0+12,-.4);
+    pos=new THREE.Vector3(ex,real?U.eyeY:2.62,ey); look=new THREE.Vector3(lx,real?1.35:1.0,ly); fov=72;
   }
   const k=r.camReady&&viewMode!=='cab'?1-Math.exp(-dt*5):1;
   cam.position.lerp(pos,k); r.look.lerp(look,k); cam.lookAt(r.look); r.camReady=true;
@@ -2130,14 +2194,14 @@ function render3D(ts,dt){
     for(let i=0;i<u.n;i++){a[i*3+1]-=u.speed*dt; if(u.snow) a[i*3]+=Math.sin(ts/900+i)*.3*dt; else a[i*3]+=u.speed*.15*dt; if(a[i*3+1]<0){a[i*3+1]+=30; a[i*3]=Math.random()*70-35;}}
     pr.geometry.attributes.position.needsUpdate=true;}
   const R=r.renderer;
-  const inCab=viewMode==='cab'; if(inCab&&VEH.cab) r.tractor.visible=false;
+  const inCab=viewMode==='cab'; if(inCab&&r.tractor.userData.eyeX&&!r.tractor.userData.showHood) r.tractor.visible=false;
   R.setRenderTarget(null); R.clear(); R.render(r.scene,cam);
   r.tractor.visible=true;
   if(viewMode==='cab'){
     const Gm=cabGeom(truck.style||TRUCKS[0]);
     for(const [m,s] of [[r.mL,-1],[r.mR,1]]){
-      const [mx2,my2]=toWorld(truck,VEH.cab?4.45:Gm.w1-.12,s*1.62), out=s*.12, a=truck.th+Math.PI+out;
-      m.cam.position.set(mx2,VEH.cab?2.3:2.4,my2); m.cam.lookAt(mx2+Math.cos(a)*20,.6,my2+Math.sin(a)*20);
+      const U=r.tractor.userData, [mx2,my2]=toWorld(truck,U.mirX||Gm.w1-.12,s*(U.mirZ||1.62)), out=s*.12, a=truck.th+Math.PI+out;
+      m.cam.position.set(mx2,U.mirY||2.4,my2); m.cam.lookAt(mx2+Math.cos(a)*20,.6,my2+Math.sin(a)*20);
       R.setRenderTarget(m.rt); R.clear(); R.render(r.scene,m.cam);
     }
     R.setRenderTarget(null); R.clearDepth(); R.render(r.hudScene,r.hudCam);
@@ -2179,8 +2243,9 @@ viewBtn.addEventListener('click',()=>{setView(VIEWS[(VIEWS.indexOf(viewMode)+1)%
 // ---------- loop ----------
 let last=0;
 function tick(ts){
-  const dt=Math.min(.05,last?(ts-last)/1000:0); last=ts;
-  if(game.mode==='play'){physics(dt); if(game.mode==='play') post(dt);}
+  const dt=Math.min(.25,last?(ts-last)/1000:0); last=ts;
+  if(game.mode==='play'){ let left=dt; while(left>1e-4&&game.mode==='play'){ const h=Math.min(.04,left); left-=h; physics(h); if(game.mode==='play') post(h); } }
+  autoQuality(dt);
   if(game.flash>0) game.flash=Math.max(0,game.flash-dt*1.6);
   fx(dt);
   if(viewMode!=='map'&&R3&&R3.scene){ render3D(ts,dt); updateCab(dt); } else draw(ts);
