@@ -19,6 +19,7 @@ EL_VOICES={
  'northwest':('CyU7Wdw4NycpZBXgjUWM','Matthew - Laid-Back, Friendly Surfer',.4,.45),
  'farm':('ckk9cEUbwIlVMpF26AhK','Bart - Confident, Friendly Midwest Male',.4,.45),
  'kc':('py1hFZJmmpGQEahpRuaE','Albert - Midwest trucker narrator',.4,.45),
+ 'atlanta':('SHiZvifpX6NOyojATxRy','Drag Jackson - deep, raspy Southern voice',.4,.5),
  'cave':('py1hFZJmmpGQEahpRuaE','Albert - Midwest trucker narrator',.4,.45),
 }
 SAY={"G.O.A.L.":"goal"}

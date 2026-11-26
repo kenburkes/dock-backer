@@ -32,7 +32,8 @@ https://claude.ai/artifact/6mYuMU7RH767BtWEkmiU54 (publish updates to that same 
   Long-Hood Show Truck.
 - Radio voices: ElevenLabs (Kenny's Starter plan, commercial use), one Voice Library accent voice per
   region (list in README and `tools/voice/gen_el.py`). The key is a network secret on the `dock-backer`
-  environment (header xi-api-key). Kenny can ask to swap any voice.
+  environment (header xi-api-key). Kenny can ask to swap any voice. Atlanta (Kenny: a Black
+  Southern man's voice) has its own guy and lines, separate from the truck stop's Southern voice.
 - Level 16 is the Kansas City underground warehouse (limestone caves; generic name, no real business name):
   rock pillars, low ceiling, no sky or weather. The cave guy has his own lines.
 - Levels go easiest to hardest: each level should need at least as many pull-ups (by the test driver)

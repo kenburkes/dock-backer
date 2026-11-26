@@ -148,3 +148,15 @@ LINES['cave']={
   'late':["Too late, driver. They locked up the cave for the night."],
   'win':["Right in the slot. Welcome to the caves.","Smooth. You can drive underground with me anytime."],
   'sloppy':["It's in. Nobody can see that angle in the dark anyway."]}
+LINES['atlanta']={
+  'pullup':["Hold up, hold up. Pull up and try that again.","Man, you backin' up like it's rush hour on 285.","Nah, nah. Straighten it out, big dog.","Come on now. You been drivin' how long?"],
+  'miss':["Wrong spot, driver. Your stall's right there.","You way off, man. Check your mirrors."],
+  'curb':["You on the curb, driver. Ease off.","Whoa, that curb was minding its business."],
+  'bump':["Easy! You tryin' to move the whole yard?","Ooh, I felt that one in my chest."],
+  'hitch':["Watch that angle, big dog. You 'bout to fold it.","Ease up on that wheel before you jackknife it."],
+  'slow':["Come on, driver. It's hot out here.","I got three more trucks behind you, man."],
+  'crash':["Oh, come on now. That's a write-up.","Man, somebody call safety. They gotta see this."],
+  'jack':["You jackknifed it! In broad daylight!"],
+  'late':["Too late, driver. Your load done went out on another truck."],
+  'win':["Now that's how you do it! Clean.","Ayy, look at you. Smooth, driver."],
+  'sloppy':["You got it in. We ain't gonna talk about how."]}

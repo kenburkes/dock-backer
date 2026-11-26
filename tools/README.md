@@ -7,11 +7,11 @@ curb, bump, near-jackknife, slow, crash, jackknife, late, clean dock, messy dock
 voice, pace and pitch each region uses.
 
 To re-record with ElevenLabs (what the game uses now): from `tools/voice/`, run
-`python3 gen_el.py ../../vo` (add `,`-separated region names to record only those, e.g. `cave,kc`).
+`python3 gen_el.py ../../vo` (it writes `voice-lines.json` next to `vo/`; move it here) (add `,`-separated region names to record only those, e.g. `cave,kc`).
 The voice for each region is in `EL_VOICES` at the top of `gen_el.py`. In the cloud environment the key is
 added by the network settings; on your own computer set `ELEVEN_API_KEY`. Raw recordings are cached in
 `el_raw/` so a re-run only pays for changed lines. Then paste `voice-lines.json` into `const RADIO=`.
-All 230 lines are about 9,000 characters (the Starter plan has 40,000 a month).
+All 251 lines are about 9,000 characters (the Starter plan has 40,000 a month).
 
 To re-record with the free Piper voices instead:
 

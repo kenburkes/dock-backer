@@ -11,7 +11,7 @@ Play it: https://claude.ai/artifact/6mYuMU7RH767BtWEkmiU54 (private; share it fr
 | Path | What it is |
 |---|---|
 | `index.html` | The whole game: one page, no install. Open it through a web server (not as a file) so the voices and 3D pictures load. |
-| `vo/` | The yard radio lines, one MP3 per line (230 lines, 12 regional accent voices from ElevenLabs). |
+| `vo/` | The yard radio lines, one MP3 per line (251 lines, 13 regional accent voices from ElevenLabs). |
 | `ph/` | 3D skies, textures and street props from Poly Haven. |
 | `models/` | The truck, trailer and car models from Sketchfab, shrunk for phones. |
 | `snd/` | Recorded truck sounds: engine loops, reverse beeper, air brakes, dock bump, rain, city and highway background. |
@@ -50,7 +50,7 @@ Everything here may be used in a game that is sold.
 - **Skies, textures, barrier, street lamp and fire hydrant:** [Poly Haven](https://polyhaven.com), CC0.
 - **Radio voices:** recorded with [ElevenLabs](https://elevenlabs.io) on a paid (Starter) plan, which allows
   commercial use of the audio, including Voice Library voices. Voices: Hank Harvey (grocery DC), Pauly (Brooklyn),
-  Jedediah (South), David - Deep Southern Cowboy (Texas), Jerry B - California Surfer Dude (LA), Pedro (Miami),
+  Jedediah (South, truck stop), Drag Jackson (Atlanta), David - Deep Southern Cowboy (Texas), Jerry B - California Surfer Dude (LA), Pedro (Miami),
   Chicago Mike (Chicago), Albert - Midwest trucker (Kansas City, the caves), Bart (Iowa), John Morgan (Denver),
   Matthew - Laid-Back Surfer (Seattle). Keep the account on a paid plan when recording new lines.
   The older Piper voices (`joe` CC0, `john`, `norman`, `bryce` public domain, `sam` Apache 2.0) remain a free fallback.
