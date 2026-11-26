@@ -75,4 +75,4 @@ https://claude.ai/artifact/6mYuMU7RH767BtWEkmiU54 (publish updates to that same 
 
 1. Phone play-test: 3D speed, mirrors, appointment times, level difficulty.
 2. Sharing the game with driver friends (Kenny decides when).
-3. Kenny should reset the Sketchfab token (it was once typed in the chat).
+3. Later: App Store and Google Play if drivers like it.
