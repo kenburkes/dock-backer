@@ -1174,7 +1174,7 @@ function showMenu(){
     <p class="lede">Back a reefer trailer into tight spots across the country: grocery warehouses, a Brooklyn curb, an LA produce market, a Miami port and a Chicago alley.</p>
     <div class="levels">${rows}</div>
     <p class="keys">3 stars: par pull-ups or fewer, nothing touched. Keyboard: ↑ forward, ↓ reverse, ← → steer, C centers the wheel, R restarts, V changes the camera.</p>
-    <p class="keys">3D skies, textures and street props: Poly Haven (CC0). Trucks: "Semi Truck Baked" by 3DE_Study, "semi truck" by taeemtasbi. Trailer: "53\u2019 Reefer Trailer" by mcskinssketchfab. Cars: "Generic passenger car pack" by Comrade1280. Models from Sketchfab, CC BY 4.0.</p>
+    <p class="keys">Truck sounds: Joseph Sardin, BigSoundBank.com (CC0). 3D skies, textures and street props: Poly Haven (CC0). Trucks: "Semi Truck Baked" by 3DE_Study, "semi truck" by taeemtasbi. Trailer: "53\u2019 Reefer Trailer" by mcskinssketchfab. Cars: "Generic passenger car pack" by Comrade1280. Models from Sketchfab, CC BY 4.0.</p>
     <div class="row"><button class="btn" data-act="chatter">Yard radio: ${save.chatter?'On':'Off'}</button></div>
     ${game.mode==='paused'?'<div class="row"><button class="btn primary" data-act="resume">Keep playing</button><button class="btn" data-act="retry">Restart level</button></div>':''}`);
 }
@@ -1278,6 +1278,22 @@ addEventListener('blur',()=>{for(const k in keys) keys[k]=false; pedal.f=pedal.r
 
 // ---------- sound: diesel engine, air brakes, reverse beeper (starts after the first tap) ----------
 let AC=null, master=null, beepGain=null, eng=null, noiseBuf=null;
+// ---------- recorded truck sounds (BigSoundBank, CC0): engine idle and load, beeper, air brakes, rain, background ----------
+const SND={}; let realSnd=null;
+function loadRealSounds(){
+  if(!AC||SND.p) return;
+  const names=['engine-idle','engine-load','reverse-beeper','air-brake','rain','city','highway','bump'];
+  SND.p=Promise.all(names.map(n=>fetch('snd/'+n+'.mp3').then(r=>{if(!r.ok) throw 0; return r.arrayBuffer();}).then(ab=>new Promise((ok,no)=>AC.decodeAudioData(ab,ok,no))).then(b=>{SND[n]=b;}).catch(()=>{}))).then(()=>{
+    if(!SND['engine-idle']||!SND['engine-load']) return;
+    const loopSrc=(buf,gain)=>{const sr=AC.createBufferSource(); sr.buffer=buf; sr.loop=true; const g=AC.createGain(); g.gain.value=0; sr.connect(g).connect(master); sr.start(); return {sr,g:g,gain:g};};
+    realSnd={idle:loopSrc(SND['engine-idle']), load:loopSrc(SND['engine-load'])};
+    if(SND['reverse-beeper']) realSnd.beep=loopSrc(SND['reverse-beeper']);
+    if(SND.rain) realSnd.rain=loopSrc(SND.rain);
+    realSnd.amb={}; for(const k of ['city','highway']) if(SND[k]) realSnd.amb[k]=loopSrc(SND[k]);
+  });
+}
+function playBuf(name,vol,rate){ if(!AC||!SND[name]) return false; const sr=AC.createBufferSource(); sr.buffer=SND[name]; sr.playbackRate.value=rate||1; const g=AC.createGain(); g.gain.value=vol; sr.connect(g).connect(master); sr.start(); return true; }
+const CITY_IDS=['bk-curb','bk-bay','chicago','miami','la'];
 function audioInit(){
   if(AC){ if(AC.state==='suspended') AC.resume(); return; }
   try{
@@ -1304,7 +1320,7 @@ function audioInit(){
     lp.connect(chug).connect(out).connect(master);
     [o1,o2,lfo,ns].forEach(n=>n.start());
     eng={o1,o2,lfo,lp,out,rpm:650};
-    setTimeout(preloadRadio,0);
+    setTimeout(preloadRadio,0); setTimeout(loadRealSounds,0);
     const rs=AC.createBufferSource(); rs.buffer=noiseBuf; rs.loop=true;
     const rh=AC.createBiquadFilter(); rh.type='highpass'; rh.frequency.value=900;
     const rl=AC.createBiquadFilter(); rl.type='lowpass'; rl.frequency.value=5000;
@@ -1319,9 +1335,20 @@ function engineTick(dt){
   const f=eng.rpm/60*3, t=AC.currentTime;
   eng.o1.frequency.setTargetAtTime(f,t,.05); eng.o2.frequency.setTargetAtTime(f/2,t,.05); eng.lfo.frequency.setTargetAtTime(f/2,t,.05);
   eng.lp.frequency.setTargetAtTime(200+(eng.rpm-650)*.5+thr*120,t,.08);
-  eng.rain.gain.setTargetAtTime(S&&S.T.wet&&game.mode!=='menu'?.06:0,AC.currentTime,.4);
-  const vol=play?.2+thr*.1:(game.mode==='brief'||game.mode==='paused'||game.mode==='done')?.08:0;
-  eng.out.gain.setTargetAtTime(t<voiceUntil?vol*.35:vol,t,.15);
+  const wet=S&&S.T.wet&&game.mode!=='menu';
+  const vol=play?.2+thr*.1:(game.mode==='brief'||game.mode==='paused'||game.mode==='done')?.08:0, duck=t<voiceUntil?.35:1;
+  if(realSnd){
+    const rate=Math.max(.92,Math.min(1.55,eng.rpm/650)), mix=Math.max(0,Math.min(1,(eng.rpm-700)/900)), v=(play?1:vol>0?.45:0)*duck;
+    realSnd.idle.sr.playbackRate.setTargetAtTime(rate,t,.08); realSnd.load.sr.playbackRate.setTargetAtTime(rate*.95,t,.08);
+    realSnd.idle.g.gain.setTargetAtTime(.55*v*(1-mix*.7),t,.12); realSnd.load.g.gain.setTargetAtTime(.6*v*mix,t,.12);
+    eng.out.gain.setTargetAtTime(vol*.25*duck,t,.15);
+    eng.rain.gain.setTargetAtTime(0,t,.2); if(realSnd.rain) realSnd.rain.g.gain.setTargetAtTime(wet?.5:0,t,.5);
+    const ambKey=L&&CITY_IDS.includes(L.id)?'city':'highway';
+    for(const k in realSnd.amb) realSnd.amb[k].g.gain.setTargetAtTime(game.mode!=='menu'&&k===ambKey?(k==='city'?.35:.28):0,t,.6);
+  } else {
+    eng.rain.gain.setTargetAtTime(wet?.06:0,t,.4);
+    eng.out.gain.setTargetAtTime(vol*duck,t,.15);
+  }
 }
 function tone(f,dur,type,vol,when,slide){
   if(!AC) return;
@@ -1341,11 +1368,11 @@ function sfx(k){
   if(k==='curb'||k==='cone') heckle(k);
   if(!AC) return;
   if(k==='win'){tone(660,.18,'triangle',.14); tone(880,.18,'triangle',.14,.16); tone(1320,.35,'triangle',.12,.32);}
-  else if(k==='crash'){tone(140,.5,'sawtooth',.22,0,40); tone(90,.6,'square',.12,.05,30); hiss(.5,.15,400);}
-  else if(k==='bump') tone(70,.18,'sine',.3);
+  else if(k==='crash'){ playBuf('bump',1,.45); tone(140,.5,'sawtooth',.18,0,40); tone(90,.6,'square',.1,.05,30); hiss(.5,.15,400);}
+  else if(k==='bump'){ if(!playBuf('bump',.9,.62)) tone(70,.18,'sine',.3); else tone(55,.2,'sine',.25); }
   else if(k==='cone') tone(420,.12,'triangle',.12,0,200);
   else if(k==='curb'){tone(60,.25,'sine',.35); tone(110,.12,'square',.06);}
-  else if(k==='air') hiss(.7,.12,1800);
+  else if(k==='air'){ if(!playBuf('air-brake',.55,1)) hiss(.7,.12,1800); }
   if(k==='air'&&typeof airPsi!=='undefined') airPsi=Math.max(92,airPsi-6);
 }
 // ---------- the yard radio: recorded lines, a different voice and way of talking in each region ----------
@@ -1388,7 +1415,9 @@ function heckle(kind,force){
 
 function beeper(){
   if(!beepGain) return;
-  const on=game.mode==='play'&&truck.v<-.05&&(performance.now()%900)<420;
+  const rev=game.mode==='play'&&truck.v<-.05;
+  if(realSnd&&realSnd.beep){ beepGain.gain.setTargetAtTime(0,AC.currentTime,.01); realSnd.beep.g.gain.setTargetAtTime(rev?.45:0,AC.currentTime,.05); return; }
+  const on=rev&&(performance.now()%900)<420;
   beepGain.gain.setTargetAtTime(on?.03:0,AC.currentTime,.006);
 }
 

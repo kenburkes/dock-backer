@@ -44,6 +44,9 @@ Everything here may be used in a game that is sold.
 - **Skies, textures, barrier, street lamp and fire hydrant:** [Poly Haven](https://polyhaven.com), CC0.
 - **Radio voices:** recorded with [Piper](https://github.com/rhasspy/piper) using the voices
   `joe` (CC0), `john`, `norman`, `bryce` (public domain) and `sam` (Apache 2.0).
+- **Truck sounds:** Joseph Sardin, BigSoundBank.com, CC0 (engine 0967 and 1145, reverse beep 1298,
+  pneumatic brake 1490, door slam 0103 for the dock bump, rain on concrete 1289, street 2372, highway 0122).
+  Cut into seamless loops and leveled for the game.
 - **3D engine:** three.js r128 (MIT), loaded from a CDN.
 - **Fonts:** Big Shoulders Display, IBM Plex Sans, IBM Plex Mono (SIL Open Font License), from Google Fonts.
 - Trucks, trailers, cars, buildings and everything else were drawn for this game.
