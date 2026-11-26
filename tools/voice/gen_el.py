@@ -13,7 +13,7 @@ EL_VOICES={
  'south':('Cb8NLd0sUB8jI4MW2f9M','Jedediah - Inviting and Rich (US Southern)',.4,.45),
  'texas':('0hh7H4ZVAtaGpm1VZyEN','David - Deep, Southern, Cowboy',.4,.45),
  'la':('rHWSYoq8UlV0YIBKMryp','Jerry B - California Surfer Dude',.35,.55),
- 'miami':('Dn7kHvEWEQXbRGLGqWJV','Pedro - Warm & Charismatic Latino',.35,.5),
+ 'miami':('Wia9gUZ4UI6MNGxAiEyR','Alvarez - Cuban-American, Reflective',.35,.5),
  'chicago':('erLaZvTFBCJD969knK8N','Chicago Mike - Tour Guide Storyteller',.35,.5),
  'mountain':('ruirxsoakN0GWmGNIo04','John Morgan - Gritty, Rugged Cowboy',.4,.45),
  'northwest':('CyU7Wdw4NycpZBXgjUWM','Matthew - Laid-Back, Friendly Surfer',.4,.45),

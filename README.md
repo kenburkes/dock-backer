@@ -50,7 +50,7 @@ Everything here may be used in a game that is sold.
 - **Skies, textures, barrier, street lamp and fire hydrant:** [Poly Haven](https://polyhaven.com), CC0.
 - **Radio voices:** recorded with [ElevenLabs](https://elevenlabs.io) on a paid (Starter) plan, which allows
   commercial use of the audio, including Voice Library voices. Voices: Hank Harvey (grocery DC), Pauly (Brooklyn),
-  Jedediah (South, truck stop), Drag Jackson (Atlanta), David - Deep Southern Cowboy (Texas), Jerry B - California Surfer Dude (LA), Pedro (Miami),
+  Jedediah (South, truck stop), Drag Jackson (Atlanta), David - Deep Southern Cowboy (Texas), Jerry B - California Surfer Dude (LA), Alvarez - Cuban-American (Miami),
   Chicago Mike (Chicago), Albert - Midwest trucker (Kansas City, the caves), Bart (Iowa), John Morgan (Denver),
   Matthew - Laid-Back Surfer (Seattle). Keep the account on a paid plan when recording new lines.
   The older Piper voices (`joe` CC0, `john`, `norman`, `bryce` public domain, `sam` Apache 2.0) remain a free fallback.
