@@ -1954,6 +1954,84 @@ function yardExtras3D(sc,R){
   R3.trees=[]; if(id!=='miami') for(let i=0;i<26;i++){ const a=i/26*Math.PI*2, r=110+R()*30, n=sc.children.length; tree3D(sc,W/2+Math.cos(a)*r,H/2+Math.sin(a)*r,4+R()*2,R()<.4); const t=sc.children[n]; if(t){ t.traverse(o=>{o.castShadow=false;}); R3.trees.push(t); if(R3.q===0) t.visible=false; } }
 }
 
+// ---------- city streets: storefronts, fire escapes, street furniture and a skyline ----------
+const SHOPS=['DELI','PIZZA','LAUNDROMAT','HARDWARE','BODEGA','TAILOR','BAKERY','DINER','PHARMACY','BARBER','LIQUORS','FLORIST','DONUTS','TACOS','CHECK CASHING','GROCERY'];
+const SHOP_COLORS=['#1f5e3a','#8a1c1c','#1d3a6b','#c28a2e','#5b2a6e','#2f6f6f','#a33a2c','#283238'];
+function signTex(txt,bg){ return ctex(256,48,(g,w,h)=>{g.fillStyle=bg; g.fillRect(0,0,w,h); g.fillStyle='rgba(255,255,255,.12)'; g.fillRect(0,0,w,4);
+  g.fillStyle='#f5f0e1'; g.font='bold 30px "Big Shoulders Display",Impact,sans-serif'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(txt,w/2,h/2+2);}); }
+// face: a wall from (a,b) to (c,d); (nx,nz) points out to the street
+function storefronts(sc,R,a,b,c,d,nx,nz,lit){
+  const len=Math.hypot(c-a,d-b), n=Math.floor(len/6.5), ang=Math.atan2(nz,nx);
+  const glass=std('#16202a',{metalness:.6,roughness:.1}), glow=new THREE.MeshStandardMaterial({color:'#3a2a12',emissive:'#ffd79a',emissiveIntensity:1.2}), frame=std('#2b2f33',{metalness:.5,roughness:.5});
+  for(let i=0;i<n;i++){
+    const t=(i+.5)/n, px=a+(c-a)*t, pz=b+(d-b)*t, k=Math.floor(R()*SHOPS.length), col=SHOP_COLORS[Math.floor(R()*SHOP_COLORS.length)];
+    const g=new THREE.Group(); g.position.set(px,0,pz); g.rotation.y=-ang; sc.add(g);
+    addBox(g,0,.12,.15,3.1,-2.7,2.7,frame);
+    addBox(g,.12,.16,.5,2.9,-2.5,.6,lit&&R()<.8?glow:glass,false);
+    addBox(g,.12,.16,.15,2.6,1.0,2.3,std('#3a2a1e',{roughness:.7}),false);
+    const sign=new THREE.Mesh(new THREE.PlaneGeometry(5.2,.9),new THREE.MeshStandardMaterial({map:signTex(SHOPS[k],col),roughness:.6,emissive:lit?'#ffffff':'#000000',emissiveMap:lit?null:null,emissiveIntensity:lit?.08:0}));
+    sign.position.set(.17,3.55,0); sign.rotation.y=Math.PI/2; g.add(sign);
+    if(R()<.6){ const aw=new THREE.Mesh(new THREE.BoxGeometry(1.3,.06,5.2),std(col,{roughness:.85})); aw.position.set(.75,3.0,0); aw.rotation.z=-.4; aw.castShadow=true; g.add(aw); }
+  }
+}
+function fireEscapes(sc,R,a,b,c,d,nx,nz,h){
+  const len=Math.hypot(c-a,d-b), n=Math.floor(len/10), ang=Math.atan2(nz,nx), iron=std('#22262a',{metalness:.6,roughness:.55});
+  for(let i=0;i<n;i++){
+    if(R()<.35) continue;
+    const t=(i+.5)/n, g=new THREE.Group(); g.position.set(a+(c-a)*t,0,b+(d-b)*t); g.rotation.y=-ang; sc.add(g);
+    for(let y=4.6,k=0;y<h-1.5;y+=3.3,k++){
+      addBox(g,.05,1.05,y,y+.07,-1.4,1.4,iron);
+      addBox(g,1.0,1.04,y+.93,y+.97,-1.4,1.4,iron,false); addBox(g,1.0,1.04,y+.45,y+.48,-1.4,1.4,iron,false);
+      for(let z=-1.4;z<=1.41;z+=.47) addBox(g,1.0,1.04,y+.07,y+.95,z-.015,z+.015,iron,false);
+      for(const z of [-1.4,1.4]) addBox(g,.05,1.04,y+.93,y+.97,z-.02,z+.02,iron,false);
+      if(y+3.3<h-1.5){ const sg=new THREE.Group(); sg.position.set(.55,y+1.68,0); sg.rotation.x=(k%2?1:-1)*.72; g.add(sg);
+        for(const x of [-.27,.27]) addBox(sg,x-.02,x+.02,-.05,.05,-1.8,1.8,iron,false);
+        for(let z=-1.6;z<1.7;z+=.3) addBox(sg,-.27,.27,-.015,.015,z-.06,z+.06,iron,false); }
+    }
+  }
+}
+function streetFurniture(sc,R,x0,z0,x1,z1,edge){
+  // edge: which side of the sidewalk strip is the curb ('x0','x1','z0','z1')
+  const along=(x1-x0)>(z1-z0), len=along?x1-x0:z1-z0, pole=std('#7d858b',{metalness:.6,roughness:.4});
+  for(let s=3;s<len-2;s+=7+R()*5){
+    const cx=along?x0+s:(edge==='x0'?x0+.35:x1-.35), cz=along?(edge==='z0'?z0+.35:z1-.35):z0+s, r=R();
+    if(r<.45){ addCyl(sc,.035,2.6,'y',cx,1.45,cz,pole,6); const sg=new THREE.Mesh(new THREE.PlaneGeometry(.45,.6),new THREE.MeshStandardMaterial({color:'#f4f4f0',side:THREE.DoubleSide})); sg.position.set(cx,2.5,cz); if(!along) sg.rotation.y=Math.PI/2; sc.add(sg);
+      const rd=new THREE.Mesh(new THREE.PlaneGeometry(.45,.12),new THREE.MeshStandardMaterial({color:'#c0262b',side:THREE.DoubleSide})); rd.position.set(cx,2.7,cz+.001); if(!along) rd.rotation.y=Math.PI/2; sc.add(rd); }
+    else if(r<.7){ addCyl(sc,.3,.95,'y',cx,.62,cz,std('#2f4a33',{roughness:.7}),12); addCyl(sc,.32,.06,'y',cx,1.12,cz,std('#263b29',{roughness:.7}),12); }
+    else if(r<.85){ addBox(sc,cx-.25,cx+.25,.15,1.2,cz-.22,cz+.22,std(['#c0262b','#1d3a6b','#e2b02f'][Math.floor(R()*3)],{roughness:.6})); }
+    else { addBox(sc,cx-.3,cx+.3,.15,1.35,cz-.28,cz+.28,std('#2c4f8f',{roughness:.5,metalness:.2})); }
+  }
+}
+function skyline(sc,R,lit,cx,cz,r0,r1,n){
+  const winTex=ctex(64,128,(g,w,h)=>{g.fillStyle='#5b6168'; g.fillRect(0,0,w,h); for(let y=6;y<h;y+=12) for(let x=4;x<w;x+=10){ g.fillStyle=lit&&Math.random()<.35?'#ffd58a':'#26303a'; g.fillRect(x,y,6,7);} },true);
+  for(let i=0;i<n;i++){
+    const a=R()*Math.PI*2, r=r0+R()*(r1-r0), x=cx+Math.cos(a)*r, z=cz+Math.sin(a)*r, w=10+R()*18, d=10+R()*18, h=18+R()*55;
+    const t=winTex.clone(); t.needsUpdate=true; t.repeat.set(Math.max(1,w/6),h/12);
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),std(['#8e8a84','#6f7377','#a39787','#7d6f66'][Math.floor(R()*4)],{map:t,roughness:.85,emissive:lit?'#ffffff':'#000000',emissiveMap:lit?t:null,emissiveIntensity:lit?.35:0}));
+    m.position.set(x,h/2,z); sc.add(m);
+  }
+}
+function cityExtras3D(sc,R){
+  const id=L.id, T=TH(), lit=T.time!=='day'||T.wet||T.fog;
+  if(id==='bk-curb'){
+    storefronts(sc,R,34,1,34,55,-1,0,lit);
+    streetFurniture(sc,R,30,0,34,56,'x0'); streetFurniture(sc,R,10,0,14,56,'x1');
+    skyline(sc,R,lit,22,28,90,220,34);
+  }
+  if(id==='bk-bay'){
+    storefronts(sc,R,0,8,44,8,0,1,lit);
+    fireEscapes(sc,R,0,26,17,26,0,-1,16); fireEscapes(sc,R,27,26,44,26,0,-1,16); fireEscapes(sc,R,18,30,18,49,1,0,14); fireEscapes(sc,R,26,30,26,49,-1,0,14);
+    streetFurniture(sc,R,0,8,44,10.5,'z1'); streetFurniture(sc,R,0,23.5,16,26,'z0'); streetFurniture(sc,R,28,23.5,44,26,'z0');
+    skyline(sc,R,lit,22,28,90,220,34);
+  }
+  if(id==='chicago'){
+    storefronts(sc,R,0,24,17.5,24,0,-1,lit); storefronts(sc,R,26.5,24,44,24,0,-1,lit);
+    fireEscapes(sc,R,18,26,18,50,1,0,15); fireEscapes(sc,R,26,26,26,50,-1,0,15);
+    streetFurniture(sc,R,0,4,44,6.5,'z1'); streetFurniture(sc,R,0,21.5,18,24,'z0'); streetFurniture(sc,R,26,21.5,44,24,'z0');
+    skyline(sc,R,lit,22,28,100,260,40);
+  }
+}
+
 function build3D(){
   if(!R3) return;
   if(R3.scene) disposeScene(R3.scene);
@@ -2088,6 +2166,7 @@ function build3D(){
   });
   decor3D(sc,R);
   yardExtras3D(sc,R);
+  cityExtras3D(sc,R);
   // our truck
   const style=truck.style||TRUCKS[0];
   R3.spin=[];
