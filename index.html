@@ -495,7 +495,7 @@ function sceneRail(){
   stalls.forEach((x,i)=>{ if(x===19) return; const ax=x+n[0]*(k0+TR), ay=51.2+n[1]*(k0+TR), a=-135*DEG;
     S.solids.push({poly:rect(ax,ay,a,L2+TF,TR,THW),kind:'trailer',ax,ay,ang:a,color:TINTS[i%TINTS.length],label:`the trailer in stall ${40+i}`}); });
   const cx=19+n[0]*(k0+7.4), cy=51.2+n[1]*(k0+7.4);
-  S.target={type:'zone',trailerOnly:true,cx,cy,ang:-135*DEG,len:15.2,wid:3.5,p:[19+n[0]*(k0+.2),51.2+n[1]*(k0+.2)],label:'Stall 42'};
+  S.target={type:'zone',trailerOnly:true,cx,cy,ang:-135*DEG,len:15.2,wid:3.2,p:[19+n[0]*(k0+.2),51.2+n[1]*(k0+.2)],label:'Stall 42'};
   S.stalls=stalls; S.lights=[[2,24],[34,10]];
   S.paint=g=>{
     g.fillStyle='#3b3631'; g.fillRect(36.4,0,W-36.4,H);
@@ -569,12 +569,21 @@ const LEVELS=[
  {id:'bk-curb',city:'Brooklyn, NY',name:'Curbside Delivery',build:sceneBrooklynCurb,start:[22.5,9,-90],par:2,limit:180,
   brief:'No dock here. Park the whole truck, tractor and trailer, inside the green Truck Loading box at the curb. Get it straight and stop. The checklist at the top shows what is still missing.',
   tip:'Back the trailer in at a gentle angle, then straighten it along the curb. Every time you touch the curb counts against you.'},
+ {id:'farm',city:'Iowa',name:'Farm Co-op',build:sceneFarm,start:[24,12,0],par:1,limit:180,
+  brief:'A gravel yard at a farm co-op. Back the reefer into Door 1 of the packing shed, in the corner, threading between the grain bins.',
+  tip:'Grain bins are round, so they sneak up on the trailer corners. Watch the guide dots near the bins.'},
  {id:'la',city:'Los Angeles, CA',name:'Produce Market',build:sceneLA,start:[6.5,27,180],par:2,limit:150,
   brief:'The produce market has saw-tooth docks: each door is set at an angle so trucks need less room. Back into Dock 3 between two trailers.',
   tip:'You only need to turn about 45 degrees. Start the swing early and let the trailer ease into the angle.'},
  {id:'miami',city:'Miami, FL',name:'Port Warehouse',build:sceneMiami,start:[33,24,0],par:2,limit:180,
   brief:'Door 14 is the only open door, and it is on your passenger side, where the trailer is hard to see. Container stacks block the top of the yard.',
   tip:'Set up with a forward move, but watch the containers. Keep the turn gentle: a sharp angle here leads straight to a jackknife.'},
+ {id:'rail',city:'Kansas City, MO',name:'Intermodal Ramp',build:sceneRail,start:[33,22,-90],par:3,limit:210,
+  brief:'A rail yard at dusk. Drop the trailer in angled Stall 42, between two trailers and right beside a parked freight train. Only the trailer has to be in the stall.',
+  tip:'Angled stalls need less swing. Start turning early and let the trailer ease into the angle.'},
+ {id:'denver',city:'Denver, CO',name:'Snowed-In DC',build:sceneDenver,start:[20,24,180],par:3,limit:210,
+  brief:'A night snowstorm. The plows piled snow along the fences, the truck slides longer when you brake, and Door 15 sits between two parked trailers.',
+  tip:'Brake early, the snow is slick. Set up gently: the snowbanks leave less room to pull forward.'},
  {id:'dallas',city:'Dallas, TX',name:'Store Dock',build:sceneDallas,start:[16,30,-90],par:3,limit:210,
   brief:'A big-box store\'s back dock, and Door 1 is on your blind side. Back in without hitting the light poles, the parked cars or the trash compactor.',
   tip:'Pull ahead and set up so you can see more of the trailer. The compactor sits right next to the dock, so get straight early.'},
@@ -584,15 +593,6 @@ const LEVELS=[
  {id:'bk-bay',city:'Brooklyn, NY',name:'Warehouse Bay',build:sceneBrooklynBay,start:[36,17,0],par:5,limit:240,
   brief:'A narrow street with cars on both sides, and the bay door is on your blind side. Back into the bay without touching a car.',
   tip:'Pull-ups are normal here. Small moves, check the guide, and reset early instead of late.'},
- {id:'rail',city:'Kansas City, MO',name:'Intermodal Ramp',build:sceneRail,start:[33,22,-90],par:2,limit:210,
-  brief:'A rail yard at dusk. Drop the trailer in angled Stall 42, between two trailers and right beside a parked freight train. Only the trailer has to be in the stall.',
-  tip:'Angled stalls need less swing. Start turning early and let the trailer ease into the angle.'},
- {id:'farm',city:'Iowa',name:'Farm Co-op',build:sceneFarm,start:[24,12,0],par:2,limit:210,
-  brief:'A gravel yard at a farm co-op. Back the reefer into Door 1 of the packing shed, in the corner, threading between the grain bins.',
-  tip:'Grain bins are round, so they sneak up on the trailer corners. Watch the guide dots near the bins.'},
- {id:'denver',city:'Denver, CO',name:'Snowed-In DC',build:sceneDenver,start:[26,22,0],par:3,limit:240,
-  brief:'A night snowstorm. The plows piled snow along the fences, the truck slides longer when you brake, and Door 15 sits between two parked trailers.',
-  tip:'Brake early, the snow is slick. Set up gently: the snowbanks leave less room to pull forward.'},
  {id:'pier',city:'Seattle, WA',name:'Seafood Pier',build:scenePier,start:[24,14,0],par:5,limit:270,
   brief:'A narrow pier with water on both sides. Back into Door 3 at the fish market on your blind side. Stay off the edges or it is a swim.',
   tip:'The mooring posts mark the edge. Keep the trailer in the middle of the pier and use the mirrors on the blind side.'},
@@ -1040,7 +1040,7 @@ const TRUCKS=[
   {name:'Long-Hood Show Truck',color:'#efece4',stripe:'#7a1424',cab:'mid',hood:'long',chrome:3,stacks:2,visor:true,roofLights:7,lightBar:true,show:true}
 ];
 const PARKED_STYLE={cab:'mid',hood:'short',chrome:1,stacks:2,roofLights:5};
-const tierOf=i=>i<3?0:i<5?1:i<8?2:i<10?3:4;
+const tierOf=i=>i<3?0:i<6?1:i<9?2:i<12?3:4;
 function dullGrad(g,a0,a1){const gr=g.createLinearGradient(0,a0,0,a1); gr.addColorStop(0,'#5c6166'); gr.addColorStop(.5,'#a9aeb2'); gr.addColorStop(1,'#5c6166'); return gr;}
 function cabGeom(st){
   const long=st.hood==='long';
