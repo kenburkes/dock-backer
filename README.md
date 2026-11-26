@@ -13,6 +13,8 @@ Play it: https://claude.ai/artifact/6mYuMU7RH767BtWEkmiU54 (private; share it fr
 | `index.html` | The whole game: one page, no install. Open it through a web server (not as a file) so the voices and 3D pictures load. |
 | `vo/` | The yard radio lines, one MP3 per line (152 lines, 7 regional voices). |
 | `ph/` | 3D skies, textures and street props from Poly Haven. |
+| `models/` | The truck, trailer and car models from Sketchfab, shrunk for phones. |
+| `snd/` | Recorded truck sounds: engine loops, reverse beeper, air brakes, dock bump, rain, city and highway background. |
 | `tools/voice/` | The script that writes and records the radio lines. |
 | `tools/tests/` | The test drivers that prove each level can be finished and set the pars, plus a 3D screenshot check. |
 
@@ -49,4 +51,13 @@ Everything here may be used in a game that is sold.
   Cut into seamless loops and leveled for the game.
 - **3D engine:** three.js r128 (MIT), loaded from a CDN.
 - **Fonts:** Big Shoulders Display, IBM Plex Sans, IBM Plex Mono (SIL Open Font License), from Google Fonts.
-- Trucks, trailers, cars, buildings and everything else were drawn for this game.
+- **Truck (levels 1-8):** "Semi Truck Baked" (https://sketchfab.com/3d-models/semi-truck-baked-3e8c5275aeab487fa37d227ce0bd1a9a)
+  by 3DE_Study, CC BY 4.0. Repainted per level.
+- **Long-hood truck (levels 9-11):** "semi truck" (https://sketchfab.com/3d-models/semi-truck-2df714a51f65471eb54fe226cdab53d0)
+  by taeemtasbi, CC BY 4.0. Painted and fitted for the game.
+- **Trailer:** "53’ Reefer Trailer" (https://sketchfab.com/3d-models/53-reefer-trailer-904c9af9277d410c98c395fd9f8f9250)
+  by mcskinssketchfab, CC BY 4.0.
+- **Cars:** "Generic passenger car pack" (https://sketchfab.com/3d-models/generic-passenger-car-pack-20f9af9b8a404d5cb022ac6fe87f21f5)
+  by Comrade1280, CC BY 4.0.
+- CC BY 4.0 allows selling the game as long as these credits stay (they are also on the Levels menu).
+- Buildings, the dashboard and everything else were drawn for this game.

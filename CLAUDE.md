@@ -32,12 +32,37 @@ https://claude.ai/artifact/6mYuMU7RH767BtWEkmiU54 (publish updates to that same 
   "Ain't no pie-eating contest!" belong to the grocery warehouse guy.
 - Views: Overhead, Cab (with side mirrors), Spotter, and the flat Map. Kenny likes the views and
   wants a real (not toy-like) 3D look.
+- The Cab view shows the inside of the cab: dashboard gauges (RPM, MPH, air, fuel), gear (D/N/R)
+  and a steering wheel that turns with the truck. The Spotter stands up high at the door.
+- Mirrors (Kenny: they must be usable like a real driver's): a tall flat mirror with a convex
+  spot mirror under it on each side, aimed so the trailer side runs down the inner edge, and they
+  follow the trailer as it swings (like the mirror tracking in truck simulators).
+- Real models from Sketchfab (CC BY 4.0, credited in README and the Levels menu): the cabover
+  tractor (levels 1-8, repainted per level with a color matrix), the long-hood tractor (levels 9-11:
+  black Big Sleeper, pearl-white Show Truck; front wheels cut out so they steer; squeezed a little
+  lengthwise to keep the shared driving footprint), the reefer trailer, and the car pack. They load
+  in the background; the drawn shapes show until they arrive. Sketchfab needs the hosts
+  media.sketchfab.com and sketchfab-prod-media.s3.amazonaws.com allowed; the API token is a network
+  secret on the `dock-backer` environment.
+- Shipping yards: taller dock walls with canopy, door number plates, dock lights, safety posts,
+  concrete aprons, yard light towers, a drop lot beyond the fence, neighbor warehouses and tree
+  lines; Miami adds container stacks, ship-to-shore cranes and water.
+- City streets (Brooklyn, Chicago): storefronts with made-up shop signs (no brands), awnings,
+  open-bar fire escapes, parking signs, trash cans, newspaper boxes, mailboxes, a skyline.
+- Real sounds from BigSoundBank (CC0): diesel idle and under-load loops blended by throttle and
+  pitched by RPM, reverse beeper, air brakes, dock bump, rain, city or highway background.
+  The synthesized sounds stay as the fallback until the files load.
+- Truck speed (Kenny: level 3 felt slow): 5.5 m/s forward (about 12 mph), 1.8 m/s reverse (about
+  4 mph). Physics runs at true speed even when the phone drops frames, and the 3D view lowers
+  shadows and sharpness on its own if the phone keeps struggling.
+- Zone levels (Brooklyn curb, truck stop, Atlanta stall): the HUD shows a checklist of what is
+  still missing (trailer in, tractor in, straight, stopped). Kenny parked between the lines on
+  Brooklyn and got nothing, so the zone check has a little slack.
 
 ## Next
 
-1. Real vehicle models from Sketchfab (free, CC BY or CC0, unbranded, credited in README). The
-   Sketchfab API token is saved as a network secret on the `dock-backer` cloud environment; the
-   first one saved was rejected as invalid and Kenny is re-copying it.
-2. ElevenLabs accent voices for all radio lines (Starter plan for commercial use), same lines as
-   `tools/voice/lines.py`.
-3. Phone play-test: 3D speed, appointment times, level difficulty.
+1. ElevenLabs accent voices for all radio lines (Starter plan for commercial use), same lines as
+   `tools/voice/lines.py`. Waiting on Kenny's key.
+2. Phone play-test: 3D speed, mirrors, appointment times, level difficulty.
+3. Sharing the game with driver friends (Kenny decides when).
+4. Kenny should reset the Sketchfab token (it was once typed in the chat).
