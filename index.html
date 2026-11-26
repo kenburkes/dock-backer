@@ -509,20 +509,22 @@ function sceneRail(){
   return S;
 }
 function sceneCave(){
-  const S=base('night','clear','You hit the cave wall.'); S.cave=true;
+  const S=base('night','clear','You hit the cave wall.'); S.cave=true; S.x0=10; S.x1=34;
   bldg(S,0,51,W,56,'the rock face','cave','#6b665e',true);
   S.doors.push({x:14,y:51,ang:-90*DEG,label:'Bay 1',num:1},{x:22,y:51,ang:-90*DEG,label:'Bay 2',num:2},{x:30,y:51,ang:-90*DEG,label:'Bay 3',num:3});
-  S.solids.push(parkedAt(S.doors[0],0));
+  S.solids.push(parkedAt(S.doors[0],0)); S.solids.push(parkedAt(S.doors[1],1));
   const pillar=(cx,cy,w,h)=>S.solids.push({poly:AR(cx-w/2,cy-h/2,cx+w/2,cy+h/2),box:[cx-w/2,cy-h/2,cx+w/2,cy+h/2],kind:'pillar',label:'a rock pillar'});
-  pillar(4,12,8,7); pillar(22,12,8,7); pillar(40,12,8,7); pillar(4,30,8,7); pillar(22,30,8,7); pillar(40,30,8,7);
+  pillar(22,30,6,6);
   S.target={type:'dock',door:S.doors[2]};
-  S.lights=[[13,21],[31,21],[13,40],[31,40]];
+  S.lights=[[14,20],[30,20],[14,38],[30,38]];
   S.paint=g=>{
     g.fillStyle='#4e4a44'; g.fillRect(0,0,W,H);
     const R=rnd(91); for(let i=0;i<2400;i++){g.fillStyle=R()<.5?'rgba(255,255,255,.05)':'rgba(0,0,0,.14)'; const s=.05+R()*.14; g.fillRect(R()*W,R()*H,s,s);}
-    g.strokeStyle='rgba(242,194,48,.55)'; g.lineWidth=.12; g.setLineDash([1.2,1]); line(g,0,21,W,21); line(g,13,0,13,51); line(g,31,0,31,51); g.setLineDash([]);
+    const X0=S.x0||0, X1=S.x1||W;
+    g.strokeStyle='rgba(242,194,48,.55)'; g.lineWidth=.12; g.setLineDash([1.2,1]); line(g,(X0+X1)/2,0,(X0+X1)/2,26); g.setLineDash([]);
     stallLines(g,S); oil(g,S);
-    g.fillStyle='#2d2a26'; g.fillRect(0,0,W,.6); g.fillRect(0,0,.6,51); g.fillRect(W-.6,0,.6,51);
+    g.fillStyle='#2d2a26'; g.fillRect(0,0,X0,H); g.fillRect(X1,0,W-X1,H); g.fillRect(X0,0,X1-X0,.5);
+    const R3r=rnd(19); g.fillStyle='rgba(255,255,255,.05)'; for(let i=0;i<600;i++){const x=R3r()<.5?R3r()*X0:X1+R3r()*(W-X1); g.fillRect(x,R3r()*H,.3,.3);}
   };
   return S;
 }
@@ -593,12 +595,12 @@ const LEVELS=[
  {id:'bk-bay',city:'Brooklyn, NY',name:'Warehouse Bay',build:sceneBrooklynBay,start:[36,17,0],par:5,limit:240,
   brief:'A narrow street with cars on both sides, and the bay door is on your blind side. Back into the bay without touching a car.',
   tip:'Pull-ups are normal here. Small moves, check the guide, and reset early instead of late.'},
+ {id:'cave',city:'Kansas City, MO',name:'Underground Warehouse',build:sceneCave,start:[26,14,0],par:4,limit:270,
+  brief:'Deep in the limestone caves under Kansas City, warehouses sit between giant rock pillars. The tunnel is narrow, a rock pillar stands in the middle, and two trailers are already docked. Back into Bay 3. No sky, no weather, low ceiling.',
+  tip:'The pillars do not move and they do not forgive. Line the trailer up with the gap before it gets there, and take pull-ups early.'},
  {id:'pier',city:'Seattle, WA',name:'Seafood Pier',build:scenePier,start:[24,14,0],par:5,limit:270,
   brief:'A narrow pier with water on both sides. Back into Door 3 at the fish market on your blind side. Stay off the edges or it is a swim.',
-  tip:'The mooring posts mark the edge. Keep the trailer in the middle of the pier and use the mirrors on the blind side.'},
- {id:'cave',city:'Kansas City, MO',name:'Underground Warehouse',build:sceneCave,start:[16,21,180],par:5,limit:300,
-  brief:'Deep in the limestone caves under Kansas City, warehouses sit between giant rock pillars. Thread the trailer between two pillars and back into Bay 3. No sky, no weather, low ceiling.',
-  tip:'The pillars do not move and they do not forgive. Line the trailer up with the gap before it gets there, and take pull-ups early.'}
+  tip:'The mooring posts mark the edge. Keep the trailer in the middle of the pier and use the mirrors on the blind side.'}
 ];
 
 // ---------- saved progress (this browser only) ----------
@@ -2262,12 +2264,11 @@ function placeExtras3D(sc,R){
     const rock=(w,h)=>phMat('concrete_wall_001',w/4,h/4,{color:'#857d72',roughness:1,side:THREE.DoubleSide});
     const ceil=new THREE.Mesh(new THREE.PlaneGeometry(W+40,H+40),rock(W+40,H+40)); ceil.rotation.x=Math.PI/2; ceil.position.set(W/2,CAVE_H,H/2); ceil.material.side=THREE.FrontSide; ceil.receiveShadow=true; sc.add(ceil);
     const wall=(x0,x1,z0,z1)=>addBox(sc,x0,x1,0,CAVE_H,z0,z1,rock(Math.max(x1-x0,z1-z0),CAVE_H));
-    wall(-3,0,-3,51); wall(W,W+3,-3,51); wall(0,8,-3,0); wall(15,W,-3,0);
+    const X0=S.x0||0, X1=S.x1||W; wall(-40,X0,-3,51); wall(X1,W+40,-3,51); wall(X0,X0+4,-3,0); wall(X0+11,X1,-3,0);
     const strip=new THREE.MeshBasicMaterial({color:'#fff1d0'});
     const tube=(cx,cz,w,d)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),strip); m.rotation.x=Math.PI/2; m.position.set(cx,CAVE_H-.05,cz); sc.add(m);};
-    for(const x of S.caveLanes||[]) for(let z=3;z<50;z+=6) tube(x,z,.25,2.2);
-    for(let x=3;x<W;x+=6) tube(x,S.caveRow||21,2.2,.25);
-    const tun=new THREE.Mesh(new THREE.PlaneGeometry(7,CAVE_H),new THREE.MeshBasicMaterial({color:'#020202'})); tun.position.set(11.5,CAVE_H/2,-2.9); sc.add(tun);
+    for(const x of [(S.x0||0)+3,(S.x1||W)-3]) for(let z=3;z<48;z+=6) tube(x,z,.25,2.2);
+    const tun=new THREE.Mesh(new THREE.PlaneGeometry(7,CAVE_H),new THREE.MeshBasicMaterial({color:'#020202'})); tun.position.set((S.x0||0)+7.5,CAVE_H/2,-2.9); sc.add(tun);
   }
   if(S.farm){
     const field=std('#5f7a3a',{roughness:1}), soil=std('#6b5238',{roughness:1});

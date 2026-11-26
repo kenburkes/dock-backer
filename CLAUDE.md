@@ -24,7 +24,7 @@ https://claude.ai/artifact/6mYuMU7RH767BtWEkmiU54 (publish updates to that same 
 ## Decisions so far
 
 - Name: Dock Backer. Separate project from New MC Load Board.
-- 15 levels, easiest to hardest (see README). Appointment windows from level 4 on. Levels 12-15
+- 16 levels, easiest to hardest (see README). Appointment windows from level 4 on. New places
   (Kenny chose "more levels"): Kansas City intermodal (angled stall by a train), Iowa farm co-op
   (grain bins), Denver snowstorm (snowbanks), Seattle pier (water edges are a fail). Each has its own
   radio region (kc, farm, mountain, northwest). No double trailers: real drivers don't back doubles.
@@ -34,8 +34,9 @@ https://claude.ai/artifact/6mYuMU7RH767BtWEkmiU54 (publish updates to that same 
   region (list in README and `tools/voice/gen_el.py`). The key is a network secret on the `dock-backer`
   environment (header xi-api-key). Kenny can ask to swap any voice. Atlanta (Kenny: a Black
   Southern man's voice) has its own guy and lines, separate from the truck stop's Southern voice.
-- Level 16 is the Kansas City underground warehouse (limestone caves; generic name, no real business name):
-  rock pillars, low ceiling, no sky or weather. The cave guy has his own lines.
+- Level 15 is the Kansas City underground warehouse (limestone caves; generic name, no real business name):
+  a narrow tunnel with a rock pillar, low ceiling, no sky or weather. The cave guy has his own lines.
+  Kenny: the cave goes just before Seattle, which stays the final level.
 - Levels go easiest to hardest: each level should need at least as many pull-ups (by the test driver)
   as the one before, and every level must stay possible.
 - Yard radio: a heckler per region (yard, Brooklyn, South, Texas, LA, Miami, Chicago); every
@@ -49,7 +50,7 @@ https://claude.ai/artifact/6mYuMU7RH767BtWEkmiU54 (publish updates to that same 
   spot mirror under it on each side, aimed so the trailer side runs down the inner edge, and they
   follow the trailer as it swings (like the mirror tracking in truck simulators).
 - Real models from Sketchfab (CC BY 4.0, credited in README and the Levels menu): the cabover
-  tractor (levels 1-8, repainted per level with a color matrix), the long-hood tractor (levels 9-11:
+  tractor (levels 1-9, repainted per level with a color matrix), the long-hood tractor (levels 10-16:
   black Big Sleeper, pearl-white Show Truck; front wheels cut out so they steer; squeezed a little
   lengthwise to keep the shared driving footprint), the reefer trailer, and the car pack. They load
   in the background; the drawn shapes show until they arrive. Sketchfab needs the hosts
